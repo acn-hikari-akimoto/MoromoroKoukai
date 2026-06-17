@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databricks 学習パック（本編＋学習リソース集＋Summit2026速報）</title>
+<style>
+  :root{
+    --accent:#FF3621;--accent-dark:#C5310E;--accent-soft:#FFEDE9;
+    --ink:#181A1F;--muted:#5C616B;--line:#E5E7EB;--bg:#FFFFFF;--bg-soft:#F7F8FA;
+    --green:#15803D;--green-soft:#ECFAF1;--blue:#2563EB;--blue-soft:#EEF3FF;
+    --amber:#B45309;--amber-soft:#FFF6E8;--gray:#5C616B;--gray-soft:#EEF0F3;
+    --code-bg:#F2F4F7;--radius:12px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,"Yu Gothic UI",sans-serif;color:var(--ink);background:var(--bg);line-height:1.85;font-size:16px;-webkit-font-smoothing:antialiased;}
+  a{color:var(--accent-dark);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* ---- tab bar ---- */
+  .tabbar{position:sticky;top:0;z-index:50;background:#0F1D26;display:flex;align-items:center;gap:6px;padding:8px 16px;flex-wrap:wrap;box-shadow:0 1px 0 rgba(255,255,255,.06);}
+  .tabbar .brand{color:#fff;font-weight:800;font-size:14px;margin-right:10px;display:flex;align-items:center;gap:8px;}
+  .tabbar .brand .dot{width:11px;height:11px;background:var(--accent);transform:rotate(45deg);border-radius:2px;flex:0 0 auto;}
+  .tabbar .tabs{display:flex;gap:4px;flex-wrap:wrap;}
+  .tabbar .tab{background:transparent;border:none;color:#AEB9C0;font-size:13px;padding:7px 13px;border-radius:8px;cursor:pointer;font-family:inherit;}
+  .tabbar .tab:hover{background:rgba(255,255,255,.08);color:#fff;}
+  .tabbar .tab.active{background:rgba(255,106,77,.2);color:#fff;font-weight:700;}
+
+  /* ---- docs ---- */
+  .doc{display:none;}
+  .doc.active{display:block;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 24px 110px;}
+
+  /* ---- hero ---- */
+  .hero{color:#fff;padding:48px 24px 42px;position:relative;overflow:hidden;background:linear-gradient(135deg,#13232E 0%,#1E3A47 60%,#2A2018 100%);}
+  .hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(255,54,33,.55),transparent 70%);}
+  .hero.h-summit{background:linear-gradient(135deg,#2A2018 0%,#7A1B0E 55%,#FF3621 130%);}
+  .hero.h-summit::after{right:-50px;top:auto;bottom:-80px;width:260px;height:260px;background:radial-gradient(circle,rgba(255,255,255,.18),transparent 70%);}
+  .hero .inner{max-width:900px;margin:0 auto;position:relative;z-index:1;}
+  .hero .kicker{display:inline-block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#FFB3A3;border:1px solid rgba(255,179,163,.4);padding:4px 12px;border-radius:999px;margin-bottom:16px;}
+  .hero.h-summit .kicker{color:#FFD9D0;border-color:rgba(255,217,208,.5);}
+  .hero h1{font-size:31px;line-height:1.3;margin:0 0 10px;color:#fff;font-weight:800;}
+  .hero p{font-size:14.5px;color:#D6DEE3;margin:6px 0 0;max-width:680px;}
+  .hero.h-summit p{color:#FBE6E1;}
+  .hero .meta{margin-top:20px;display:flex;flex-wrap:wrap;gap:9px;}
+  .hero .meta span{font-size:12.5px;background:rgba(255,255,255,.1);padding:5px 12px;border-radius:8px;color:#E7EDF0;}
+  .hero.h-summit .meta span{background:rgba(0,0,0,.22);color:#fff;}
+
+  /* ---- inline toc ---- */
+  .toc-inline{border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:22px 0;background:var(--bg-soft);}
+  .toc-inline .h{font-weight:700;font-size:13px;margin-bottom:8px;}
+  .toc-inline a{display:inline-block;font-size:12.5px;color:#33363D;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px 11px;margin:3px 4px 3px 0;}
+  .toc-inline a:hover{border-color:var(--accent);color:var(--accent-dark);text-decoration:none;}
+
+  /* ---- typography ---- */
+  h2{font-size:24px;margin:50px 0 6px;padding-top:12px;font-weight:800;}
+  h2 .num{color:var(--accent);font-size:14px;font-weight:700;display:block;margin-bottom:2px;letter-spacing:.06em;}
+  h3{font-size:18px;margin:30px 0 8px;font-weight:700;border-left:4px solid var(--accent);padding-left:12px;}
+  h4{font-size:15.5px;margin:20px 0 4px;font-weight:700;color:#2A2D34;}
+  p{margin:10px 0;}
+  .lead{font-size:16px;color:#33363D;}
+  ul,ol{margin:10px 0;padding-left:24px;}
+  li{margin:5px 0;}
+  strong{font-weight:700;}
+  section{scroll-margin-top:72px;}
+  code{background:var(--code-bg);padding:2px 6px;border-radius:5px;font-size:13.5px;font-family:Consolas,Menlo,monospace;color:#B7280B;}
+
+  /* ---- callouts ---- */
+  .box{border-radius:var(--radius);padding:14px 18px;margin:18px 0;border:1px solid var(--line);background:var(--bg-soft);}
+  .box p:first-child{margin-top:0;}.box p:last-child{margin-bottom:0;}
+  .box .label{font-weight:700;font-size:13px;margin-bottom:4px;}
+  .box.key{background:var(--accent-soft);border-color:#FFC9BD;}.box.key .label{color:var(--accent-dark);}
+  .box.note{background:var(--blue-soft);border-color:#CFE0FF;}.box.note .label{color:var(--blue);}
+  .box.tip{background:var(--green-soft);border-color:#C9EEDA;}.box.tip .label{color:var(--green);}
+  .box.warn{background:var(--amber-soft);border-color:#FBE2BC;}.box.warn .label{color:var(--amber);}
+
+  /* ---- tables ---- */
+  .tablewrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);border-radius:var(--radius);}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  thead th{background:#13232E;color:#fff;font-weight:700;font-size:13px;}
+  tbody tr:nth-child(even){background:var(--bg-soft);}
+  td strong{color:var(--ink);}
+
+  /* ---- cards ---- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0;}
+  .card{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;background:#fff;}
+  .card h4{margin:0 0 6px;font-size:15px;color:var(--ink);}
+  .card p{margin:0;font-size:14px;color:var(--muted);}
+  .card .tag{display:inline-block;font-size:11px;color:var(--accent-dark);background:var(--accent-soft);padding:2px 9px;border-radius:6px;margin-bottom:8px;font-weight:700;}
+
+  /* ---- pros/cons ---- */
+  .pc{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0;}
+  .pc .col{border-radius:var(--radius);padding:16px 18px;border:1px solid var(--line);}
+  .pc .pros{background:var(--green-soft);border-color:#C9EEDA;}
+  .pc .cons{background:var(--amber-soft);border-color:#FBE2BC;}
+  .pc h4{margin-top:0;}
+  .pc .pros h4{color:var(--green);}.pc .cons h4{color:var(--amber);}
+  .pc ul{padding-left:20px;margin:6px 0 0;}.pc li{font-size:14px;}
+
+  /* ---- timeline ---- */
+  .timeline{position:relative;margin:24px 0 24px 6px;padding-left:26px;border-left:2px solid var(--line);}
+  .tl{position:relative;margin-bottom:20px;}
+  .tl::before{content:"";position:absolute;left:-33px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 1px var(--accent);}
+  .tl .yr{font-weight:800;color:var(--accent-dark);font-size:14px;}
+  .tl .ev{font-size:14.5px;}
+
+  /* ---- flow (medallion + roadmap) ---- */
+  .flow{display:flex;align-items:stretch;gap:0;margin:20px 0;flex-wrap:wrap;}
+  .flow .step{flex:1 1 160px;min-width:160px;border:1px solid var(--line);border-radius:10px;padding:14px;background:#fff;}
+  .flow .arrow{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:22px;flex:0 0 28px;}
+  .flow .step .t{font-weight:800;font-size:15px;}
+  .flow .step .d{font-size:12.5px;color:var(--muted);margin-top:4px;}
+  .flow .step ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--muted);}
+  .flow .step li{margin:3px 0;}
+  .flow .step.b-bronze,.flow .step.b-silver,.flow .step.b-gold{text-align:center;}
+  .b-bronze{border-top:4px solid #B07B3E;}.b-silver{border-top:4px solid #9AA3AC;}.b-gold{border-top:4px solid #E0A100;}
+  .s-intro{border-top:4px solid var(--green);}.s-basic{border-top:4px solid var(--blue);}.s-mid{border-top:4px solid var(--accent);}
+
+  /* ---- figures ---- */
+  figure{margin:22px 0;}
+  figure svg{max-width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:var(--radius);background:#fff;}
+  figcaption{font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px;}
+  .src{font-size:12px;color:var(--muted);margin-top:6px;}
+  .src a{color:var(--muted);text-decoration:underline;}
+
+  /* ---- question cards ---- */
+  .qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:18px 0;}
+  .qcard{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .qcard h4{margin:0 0 8px;display:flex;align-items:center;gap:8px;}
+  .qcard h4 .ic{width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent-dark);display:inline-flex;align-items:center;justify-content:center;font-size:14px;}
+  .qcard ul{margin:0;padding-left:18px;}.qcard li{font-size:13.5px;margin:7px 0;}
+
+  .reflist{font-size:13.5px;}
+  .reflist h4{margin:18px 0 6px;}
+  .reflist ul{padding-left:20px;}
+  .reflist li{margin:4px 0;word-break:break-word;}
+
+  /* ---- resource list (learn) ---- */
+  .res{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin:14px 0;}
+  .item{padding:14px 18px;border-bottom:1px solid var(--line);background:#fff;}
+  .item:last-child{border-bottom:none;}
+  .item:nth-child(even){background:var(--bg-soft);}
+  .item .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px;align-items:center;}
+  .chip{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;}
+  .lv-intro{background:var(--green-soft);color:var(--green);}
+  .lv-basic{background:var(--blue-soft);color:var(--blue);}
+  .lv-mid{background:var(--accent-soft);color:var(--accent-dark);}
+  .ty{background:#EEF0F3;color:#4A4F58;}
+  .item .ttl{font-weight:700;font-size:15px;line-height:1.5;}
+  .item .desc{font-size:13.5px;color:var(--muted);margin:3px 0 4px;}
+  .item .host{font-size:11.5px;color:#9097A1;}
+  .item .host::before{content:"🔗 ";}
+  .star{color:var(--accent);font-size:12px;font-weight:700;}
+
+  /* ---- badges (summit) ---- */
+  .badge{display:inline-block;font-size:11px;font-weight:800;padding:2px 9px;border-radius:6px;vertical-align:middle;}
+  .b-ga{background:var(--green-soft);color:var(--green);border:1px solid #C9EEDA;}
+  .b-pp{background:var(--blue-soft);color:var(--blue);border:1px solid #CFE0FF;}
+  .b-beta{background:var(--amber-soft);color:var(--amber);border:1px solid #FBE2BC;}
+  .b-soon{background:var(--gray-soft);color:var(--gray);border:1px solid #DDE0E5;}
+  .b-ann{background:var(--accent-soft);color:var(--accent-dark);border:1px solid #FFC9BD;}
+  .b-chk{background:#FFF2F0;color:#B7280B;border:1px dashed #E89A8C;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;font-size:12px;color:var(--muted);align-items:center;}
+  .feat{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin:14px 0;background:#fff;}
+  .feat h4{margin-top:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--ink);}
+  .feat p{margin:6px 0;font-size:14.5px;}
+  .tldr{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:18px 0;}
+  .tcard{border:1px solid var(--line);border-radius:var(--radius);padding:16px;background:#fff;border-top:4px solid var(--accent);}
+  .tcard .n{font-size:12px;font-weight:800;color:var(--accent);}
+  .tcard h4{margin:4px 0 6px;font-size:16px;}
+  .tcard p{margin:0;font-size:13.5px;color:var(--muted);}
+
+  footer{border-top:1px solid var(--line);margin-top:56px;padding-top:22px;font-size:12.5px;color:var(--muted);}
+
+  @media (max-width:640px){
+    body{font-size:15px;}
+    .hero h1{font-size:24px;}h2{font-size:20px;}h3{font-size:16.5px;}
+    .pc{grid-template-columns:1fr;}
+    .flow .arrow{flex-basis:100%;transform:rotate(90deg);height:24px;}
+  }
+  @media print{
+    .tabbar{display:none!important;}
+    a{color:var(--ink);}
+    .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .box,.card,table,figure,.feat{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="tabbar">
+  <span class="brand"><span class="dot"></span>Databricks 学習パック</span>
+  <div class="tabs">
+    <button class="tab active" data-target="doc-main">📘 本編：入門ガイド</button>
+    <button class="tab" data-target="doc-learn">📚 学習リソース集</button>
+    <button class="tab" data-target="doc-summit">📣 Summit 2026 速報</button>
+  </div>
+</nav>
+
+<!-- ============================================================= -->
+<!-- DOC 1 : 本編 入門ガイド                                        -->
+<!-- ============================================================= -->
+<div class="doc active" id="doc-main">
+  <header class="hero h-main">
+    <div class="inner">
+      <span class="kicker">For Beginners ― 勉強会 事前学習</span>
+      <h1>Databricks をはじめて学ぶ人のための<br>最低限ガイド</h1>
+      <p>「データ＋AIの統合基盤」であるDatabricksの歴史・強み・弱み、そしてデータ活用／AI活用を進めるうえで知っておきたい勘所を、初学者向けにまとめました。明日の勉強会で議論についていき、的確に質問するための土台づくりが目的です。</p>
+      <div class="meta">
+        <span>📅 2026年6月時点の情報</span>
+        <span>🎯 対象：Databricks初学者</span>
+        <span>📖 読み物形式（上から順に読めます）</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <nav class="toc-inline" aria-label="目次">
+      <div class="h">📑 本編もくじ</div>
+      <a href="#summary">30秒で分かる</a>
+      <a href="#what">1. とは</a>
+      <a href="#history">2. 歴史と会社背景</a>
+      <a href="#lakehouse">3. アーキテクチャ</a>
+      <a href="#delta">Delta Lake</a>
+      <a href="#unity">Unity Catalog</a>
+      <a href="#compute">2つのプレーン</a>
+      <a href="#data-eng">4. データ活用</a>
+      <a href="#ai">5. AI活用</a>
+      <a href="#strengths">6. 強み</a>
+      <a href="#weaknesses">7. 弱み</a>
+      <a href="#compare">8. 競合比較</a>
+      <a href="#pricing">9. 料金(DBU)</a>
+      <a href="#glossary">10. 用語集</a>
+      <a href="#questions">11. 聞く質問</a>
+      <a href="#refs">12. 参考リンク</a>
+    </nav>
+
+    <section id="summary">
+      <div class="box key">
+        <div class="label">⚡ 30秒で分かるDatabricks</div>
+        <ul>
+          <li><strong>ひとことで：</strong>大量データの「ためる・整える・分析する・AIに使う」を1つにまとめたクラウド基盤。中心思想は<strong>「レイクハウス（Lakehouse）」</strong>。</li>
+          <li><strong>出自：</strong>分散処理エンジン <strong>Apache Spark</strong> を生んだUC Berkeleyの研究者が2013年に創業。</li>
+          <li><strong>強み：</strong>データ基盤とAI/機械学習を<strong>一気通貫</strong>で扱える／オープンな形式でロックインが少ない／マルチクラウド対応。</li>
+          <li><strong>弱み：</strong><strong>学習コストが高くコスト管理が難しい</strong>。エンジニア前提の作りで、SQL分析だけなら他の方が手軽なことも。</li>
+          <li><strong>競合：</strong>Snowflake（SQL分析が得意）、各クラウドのネイティブサービス（AWS Redshift、Google BigQuery 等）。<strong>「どれか一つ」ではなく「役割分担で併用」</strong>が今の主流。</li>
+        </ul>
+      </div>
+      <div class="box note">
+        <div class="label">📌 この資料の使い方</div>
+        <p>上から順に読めば全体像 → 仕組み → 活用 → 評価の流れで理解できます。時間がなければ <a href="#summary">30秒サマリー</a> → <a href="#strengths">強み</a>／<a href="#weaknesses">弱み</a> → <a href="#questions">聞くと良い質問</a> だけでもOK。専門用語は <a href="#glossary">10. 用語チートシート</a> でいつでも確認できます。</p>
+      </div>
+      <div class="box warn">
+        <div class="label">⚠️ 読むうえでの注意</div>
+        <p>Databricksは<strong>製品名・機能名の改称や新機能の追加が非常に速い</strong>会社です。本資料は2026年6月時点の公開情報に基づきます。評価額・売上・従業員数・IPO時期などの数字は<strong>変動が激しく、報道ベースのものは「※報道ベース」と明記</strong>しました。正確な最新情報は必ず<a href="https://docs.databricks.com/" target="_blank" rel="noopener">公式ドキュメント</a>でご確認ください。</p>
+      </div>
+      <div class="box note">
+        <div class="label">🔗 この資料は3部構成（上部タブで切替）</div>
+        <p>本編（このタブ）に加えて、次の2つを用意しています。</p>
+        <ul>
+          <li><a href="#" class="xlink" data-target="doc-learn">📚 体系的に学ぶためのリソース集</a> ― 入門→基礎→中級。公式＋Qiita/Zenn/classmethod等の良質な日本語ナレッジを厳選。</li>
+          <li><a href="#" class="xlink" data-target="doc-summit">📣 Data + AI Summit 2026 速報まとめ</a> ― 本日開催中の最新発表（LTAP / Agent Bricks 等）を出典付きで整理。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="what">
+      <h2><span class="num">SECTION 1</span>Databricksとは（全体像）</h2>
+      <p class="lead">Databricksは、企業のあらゆるデータを<strong>1か所に集約し、整え、分析し、機械学習・生成AIに活用する</strong>までを単一プラットフォームで行える「データインテリジェンスプラットフォーム」です。</p>
+      <p>従来、企業のデータ活用には2つの別々の仕組みが必要でした。</p>
+      <ul>
+        <li><strong>データウェアハウス（DWH）</strong>：きれいに整えた構造化データを高速にSQL分析・BIする箱。信頼性は高いが、画像・テキストなど非構造化データやAI用途は苦手。</li>
+        <li><strong>データレイク</strong>：あらゆる生データを安く大量にためる箱。AI/データサイエンス向きだが、品質保証がなくBIには信頼性が低い。</li>
+      </ul>
+      <p>この2つを別々に持つと、データが二重管理になり（サイロ化）、コスト増・鮮度低下・ガバナンスの分断が起きます。Databricksはこの両者の良いとこ取りをした<strong>「レイクハウス」</strong>という1つの箱に統合することを提案しました。これがDatabricksを理解する最重要キーワードです。</p>
+      <figure>
+        <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Databricksの全体像">
+          <rect x="0" y="0" width="760" height="250" fill="#ffffff"/>
+          <text x="20" y="28" font-size="13" font-weight="700" fill="#181A1F">① データソース</text>
+          <rect x="20" y="40" width="150" height="34" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="95" y="62" font-size="12" fill="#5C616B" text-anchor="middle">DB・ログ・SaaS・IoT</text>
+          <rect x="20" y="84" width="150" height="34" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="95" y="106" font-size="12" fill="#5C616B" text-anchor="middle">ファイル・画像・文書</text>
+          <path d="M178 84 L214 84" stroke="#FF3621" stroke-width="2" marker-end="url(#a)"/>
+          <rect x="222" y="22" width="320" height="206" rx="14" fill="#FFF7F5" stroke="#FFC9BD" stroke-width="1.5"/>
+          <text x="382" y="46" font-size="14" font-weight="800" fill="#C5310E" text-anchor="middle">② レイクハウス基盤（Databricks）</text>
+          <rect x="240" y="58" width="284" height="30" rx="6" fill="#fff" stroke="#E5E7EB"/>
+          <text x="382" y="78" font-size="12" fill="#181A1F" text-anchor="middle">オープン形式で保存（Delta Lake / Parquet）</text>
+          <rect x="240" y="94" width="284" height="30" rx="6" fill="#fff" stroke="#E5E7EB"/>
+          <text x="382" y="114" font-size="12" fill="#181A1F" text-anchor="middle">統一ガバナンス（Unity Catalog）</text>
+          <rect x="240" y="130" width="138" height="30" rx="6" fill="#fff" stroke="#E5E7EB"/>
+          <text x="309" y="150" font-size="11.5" fill="#181A1F" text-anchor="middle">高速処理 Spark/Photon</text>
+          <rect x="386" y="130" width="138" height="30" rx="6" fill="#fff" stroke="#E5E7EB"/>
+          <text x="455" y="150" font-size="11.5" fill="#181A1F" text-anchor="middle">AI/ML（Mosaic AI）</text>
+          <rect x="240" y="166" width="284" height="30" rx="6" fill="#13232E"/>
+          <text x="382" y="186" font-size="12" fill="#fff" text-anchor="middle">1つの基盤に統合（=レイクハウス）</text>
+          <path d="M548 124 L584 124" stroke="#FF3621" stroke-width="2" marker-end="url(#a)"/>
+          <text x="592" y="28" font-size="13" font-weight="700" fill="#181A1F">③ 活用</text>
+          <rect x="592" y="40" width="150" height="30" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="667" y="60" font-size="12" fill="#5C616B" text-anchor="middle">BI・ダッシュボード</text>
+          <rect x="592" y="76" width="150" height="30" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="667" y="96" font-size="12" fill="#5C616B" text-anchor="middle">機械学習モデル</text>
+          <rect x="592" y="112" width="150" height="30" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="667" y="132" font-size="12" fill="#5C616B" text-anchor="middle">生成AI・RAG</text>
+          <rect x="592" y="148" width="150" height="30" rx="7" fill="#F2F4F7" stroke="#E5E7EB"/>
+          <text x="667" y="168" font-size="12" fill="#5C616B" text-anchor="middle">データアプリ</text>
+          <defs><marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#FF3621"/></marker></defs>
+        </svg>
+        <figcaption>Databricksの全体像：あらゆるデータを1つのレイクハウス基盤に集約し、BIからAIまで同じ場所で活用する</figcaption>
+      </figure>
+      <div class="box tip">
+        <div class="label">💡 ここだけ押さえる</div>
+        <p>Databricks ＝ <strong>「レイクハウス」という1つの基盤の上で、データ整備（エンジニアリング）・分析（BI）・AI（機械学習/生成AI）を同じデータ・同じガバナンスで回せる</strong>こと。「データとAIを分断させない」のが価値の核心です。</p>
+      </div>
+    </section>
+
+    <section id="history">
+      <h2><span class="num">SECTION 2</span>歴史と会社背景</h2>
+      <p class="lead">Databricksの強みの源泉は、その出自にあります。<strong>「分散処理エンジンApache Sparkを生んだ研究者たちが、その商用版として創業した会社」</strong>という点が、技術的な信頼性とAI志向の背景になっています。</p>
+      <h3>起源：UC Berkeley と Apache Spark</h3>
+      <p>2009年ごろ、カリフォルニア大学バークレー校の研究室「AMPLab」で、Matei Zaharia氏らが大規模データを高速に分散処理するエンジン <strong>Apache Spark</strong> を開発しました（2010年にオープンソース化）。MapReduceの非効率を解決するためにメモリを活用する設計が画期的で、ビッグデータ処理の事実上の標準になっていきます。</p>
+      <p>2013年、このSparkの中心メンバー7名が、Sparkを企業が使いやすい形で提供するために <strong>Databricks</strong> を創業しました。</p>
+      <div class="box note">
+        <div class="label">👥 共同創業者（7名）と現体制</div>
+        <p>Ali Ghodsi、Ion Stoica、Matei Zaharia、Patrick Wendell、Reynold Xin、Andy Konwinski、Arsalan Tavakoli-Shiraji。現在は <strong>Ali Ghodsi がCEO</strong>（2016年〜）、Ion Stoica が Executive Chair、Matei Zaharia が CTO を務めます。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/company/founders" target="_blank" rel="noopener">Databricks 創業者ページ（公式）</a></p>
+      </div>
+      <h3>製品コンセプトの進化</h3>
+      <div class="timeline">
+        <div class="tl"><div class="yr">2013年</div><div class="ev">Apache Sparkの開発者が創業（米サンフランシスコ）。当初はSparkのマネージドサービスを提供。</div></div>
+        <div class="tl"><div class="yr">2018〜2019年</div><div class="ev"><strong>Delta Lake</strong> を発表（2019年にLinux Foundationへ寄贈）。データレイクにACID（信頼性）をもたらす。</div></div>
+        <div class="tl"><div class="yr">2020〜2021年</div><div class="ev"><strong>「レイクハウス」</strong>という概念を学術論文として提唱。<strong>Databricks SQL</strong> を投入しDWH領域へ本格進出。</div></div>
+        <div class="tl"><div class="yr">2022年</div><div class="ev"><strong>Unity Catalog</strong>（統一ガバナンス）を一般提供。データとAIの管理を一元化。</div></div>
+        <div class="tl"><div class="yr">2023年</div><div class="ev">生成AI企業 <strong>MosaicML を約13億ドルで買収</strong>。現在の「Mosaic AI」の土台に。</div></div>
+        <div class="tl"><div class="yr">2024年</div><div class="ev">自社オープンLLM <strong>DBRX</strong> を公開。<strong>Tabular</strong>（Apache Iceberg）買収。<strong>Unity CatalogをOSS化</strong>。</div></div>
+        <div class="tl"><div class="yr">2025年</div><div class="ev">サーバーレスPostgresの <strong>Neon を約10億ドルで買収 → Lakebase</strong> へ。データエンジ統合ブランド <strong>Lakeflow</strong>、AI/BIの <strong>Genie</strong> 等を拡充。</div></div>
+      </div>
+      <p class="src">出典：<a href="https://en.wikipedia.org/wiki/Databricks" target="_blank" rel="noopener">Wikipedia: Databricks</a>／<a href="https://www.databricks.com/blog/open-sourcing-unity-catalog" target="_blank" rel="noopener">Unity Catalog OSS化（公式ブログ）</a>／<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-agrees-acquire-neon-help-developers-deliver-ai-systems" target="_blank" rel="noopener">Neon買収（公式）</a></p>
+      <h3>会社規模・資金・IPO</h3>
+      <p>Databricksは未上場ながら世界最大級のソフトウェアスタートアップの一つに成長しました。代表的な公式・報道情報は以下のとおりです。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>項目</th><th>内容</th><th>確度</th></tr></thead>
+          <tbody>
+            <tr><td>創業 / 本社</td><td>2013年 / 米サンフランシスコ</td><td>公式</td></tr>
+            <tr><td>売上ラン・レート</td><td>年率 <strong>約48億ドル超</strong>（2025年、前年比55%超の成長）。報道では54億ドル規模とも</td><td>48億は公式／54億は※報道ベース</td></tr>
+            <tr><td>評価額</td><td><strong>約1,340億ドル</strong>（2025年12月 Series L）。さらに1,650〜1,750億ドル規模の調達協議も報じられる</td><td>1,340億は公式／以降は※報道ベース</td></tr>
+            <tr><td>従業員数</td><td>約12,000人規模（2026年）</td><td>※報道・集計ベース</td></tr>
+            <tr><td>上場（IPO）</td><td>2026年6月時点で<strong>未上場</strong>。IPO志向を表明し時期が注目されている</td><td>未上場は事実／時期は※報道ベース</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">出典：<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-surpasses-4-8b-revenue-run-rate-growing-55-year-over-year" target="_blank" rel="noopener">Series L プレスリリース（公式）</a>／評価額・従業員数・IPO時期は CNBC等の報道に基づく（変動が激しいため要確認）</p>
+      <h3>買収から読み解く戦略</h3>
+      <p>近年の買収は、Databricksが何を強化しようとしているかを端的に示しています。</p>
+      <div class="cards">
+        <div class="card"><span class="tag">生成AI</span><h4>MosaicML（2023）</h4><p>LLMの学習・提供基盤。現在のMosaic AIの中核。「AI企業」への転換点。</p></div>
+        <div class="card"><span class="tag">オープン性</span><h4>Tabular（2024）</h4><p>Apache Icebergの創設者企業。Delta/Iceberg両対応＝形式の主導権争いへの布石。</p></div>
+        <div class="card"><span class="tag">業務系DB</span><h4>Neon（2025）</h4><p>サーバーレスPostgres。AIアプリ向けの運用DB「Lakebase」へ。OLTP領域へ拡張。</p></div>
+      </div>
+    </section>
+
+    <section id="lakehouse">
+      <h2><span class="num">SECTION 3</span>アーキテクチャとコア概念</h2>
+      <p class="lead">勉強会で頻出する用語の中核を、初学者向けに整理します。<strong>レイクハウス＝家全体、Delta Lake＝土台、Unity Catalog＝管理人、Photon＝エンジン</strong>とイメージすると掴みやすいです。</p>
+      <h3>3-1. レイクハウス（Lakehouse）</h3>
+      <p>DWHとデータレイクの利点を1つに統合したアーキテクチャ。<strong>安価なクラウドストレージにオープン形式でためつつ、DWH並みの信頼性・高速SQL・ガバナンスを実現</strong>します。「データの単一の正（Single Source of Truth）」を作ることが狙いです。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>観点</th><th>データウェアハウス</th><th>データレイク</th><th>レイクハウス</th></tr></thead>
+          <tbody>
+            <tr><td>得意</td><td>BI・SQL分析</td><td>生データ蓄積・AI</td><td><strong>両方</strong></td></tr>
+            <tr><td>データ種別</td><td>構造化中心</td><td>何でも</td><td>何でも</td></tr>
+            <tr><td>信頼性（ACID）</td><td>高い</td><td>低い</td><td><strong>高い</strong></td></tr>
+            <tr><td>コスト</td><td>高め</td><td>安い</td><td>安いストレージ＋必要時計算</td></tr>
+            <tr><td>ロックイン</td><td>されやすい</td><td>少ない</td><td><strong>少ない（オープン形式）</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="src">出典：<a href="https://docs.databricks.com/aws/en/lakehouse" target="_blank" rel="noopener">What is a data lakehouse?（公式ドキュメント）</a></p>
+
+      <h3 id="delta">3-2. Delta Lake（信頼性の土台）</h3>
+      <p>レイクハウスの<strong>ストレージの土台</strong>となるオープンな技術。安価なファイル（Parquet）にメタデータ層を足すことで、データベース並みの信頼性をデータレイクにもたらします。</p>
+      <ul>
+        <li><strong>ACIDトランザクション：</strong>複数人が同時に読み書きしてもデータが壊れない（中途半端な状態が見えない）。</li>
+        <li><strong>タイムトラベル：</strong>「3日前のテーブル状態」をバージョンや時刻で遡って参照できる。監査・障害復旧に有効。</li>
+        <li><strong>スキーマ管理：</strong>列の型を強制（enforcement）しつつ、必要に応じて拡張（evolution）できる。</li>
+      </ul>
+      <div class="box note">
+        <div class="label">📌 Delta と Iceberg（よく聞かれる論点）</div>
+        <p>業界にはもう一つの主要オープン形式 <strong>Apache Iceberg</strong> があります。Databricksは <strong>UniForm（現：Iceberg reads）</strong> という仕組みで、Delta Lakeのテーブルを<strong>Icebergクライアントからも読める</strong>ようにしています（※外部Icebergからは<strong>読み取り専用</strong>という制約あり）。Tabular買収もあり、Databricksは「形式の壁を越える相互運用」を進めています。</p>
+        <p class="src">出典：<a href="https://docs.databricks.com/aws/en/delta/uniform" target="_blank" rel="noopener">Read Delta Lake tables with Iceberg clients（公式）</a></p>
+      </div>
+
+      <h3 id="unity">3-3. Unity Catalog（統一ガバナンス＝管理人）</h3>
+      <p>データとAI資産を<strong>横断的に一元管理</strong>する仕組み。「誰が何にアクセスできるか」「このデータはどこから来てどこで使われているか」を統一的に扱います。データ活用を組織で安全に広げるうえで極めて重要です。</p>
+      <ul>
+        <li><strong>3階層の名前空間：</strong><code>カタログ.スキーマ.テーブル</code> でデータを整理。</li>
+        <li><strong>アクセス制御：</strong>使い慣れたSQL構文で、行フィルタリングや列マスキング（個人情報の隠蔽）まで設定可能。</li>
+        <li><strong>データリネージ：</strong>どのジョブ・ノートブックがデータを作り、どのダッシュボードが使っているかを<strong>列レベルまで自動追跡</strong>。</li>
+        <li><strong>監査ログ：</strong>誰がいつ何にアクセスしたかを記録。</li>
+      </ul>
+      <p class="src">出典：<a href="https://docs.databricks.com/aws/en/data-governance/unity-catalog/" target="_blank" rel="noopener">What is Unity Catalog?（公式）</a></p>
+
+      <h3 id="photon">3-4. Photon / Databricks SQL（高速エンジンとDWH機能）</h3>
+      <p><strong>Photon</strong>は、DatabricksがC++でゼロから作り直した<strong>高速クエリエンジン</strong>。データを列指向のまとまりで処理し、SQLやETLを大幅に高速化します（公式は他クラウドDWH比で高い価格性能を主張）。既存のSQL/Python/Scalaコードを書き換えずに使えるのが利点です。</p>
+      <p><strong>Databricks SQL</strong>は、レイクハウス上でDWHのようにSQL分析・BIを行う機能群。その計算基盤が <strong>SQLウェアハウス</strong>で、性能と運用負荷に応じて <strong>Serverless / Pro / Classic</strong> の3タイプから選べます（Serverlessは起動が速く運用をDatabricksに任せられる）。</p>
+      <p class="src">出典：<a href="https://docs.databricks.com/aws/en/compute/photon" target="_blank" rel="noopener">What is Photon?（公式）</a>／<a href="https://docs.databricks.com/aws/en/sql/" target="_blank" rel="noopener">Data warehousing on Databricks（公式）</a></p>
+
+      <h3 id="compute">3-5. コンピュートと「2つのプレーン」（重要な構造）</h3>
+      <p>Databricksは <strong>コントロールプレーン</strong> と <strong>コンピュートプレーン</strong> という2層で動きます。セキュリティやコストを理解するうえで重要な概念です。</p>
+      <figure>
+        <svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="コントロールプレーンとコンピュートプレーン">
+          <rect x="0" y="0" width="760" height="240" fill="#ffffff"/>
+          <rect x="20" y="24" width="330" height="192" rx="12" fill="#13232E"/>
+          <text x="185" y="50" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">コントロールプレーン</text>
+          <text x="185" y="70" font-size="11.5" fill="#9DAAB2" text-anchor="middle">（Databricksが管理する側）</text>
+          <rect x="44" y="88" width="282" height="32" rx="7" fill="#1E3A47"/><text x="185" y="109" font-size="12" fill="#fff" text-anchor="middle">Web UI・ノートブック・ジョブ管理</text>
+          <rect x="44" y="128" width="282" height="32" rx="7" fill="#1E3A47"/><text x="185" y="149" font-size="12" fill="#fff" text-anchor="middle">設定・カタログ・認証</text>
+          <text x="185" y="190" font-size="11" fill="#7E8E97" text-anchor="middle">※ データ本体はここには置かれない</text>
+          <path d="M356 120 L404 120" stroke="#FF3621" stroke-width="2.5" marker-end="url(#b)"/>
+          <text x="380" y="112" font-size="10" fill="#5C616B" text-anchor="middle">指示</text>
+          <rect x="410" y="24" width="330" height="192" rx="12" fill="#FFF7F5" stroke="#FFC9BD" stroke-width="1.5"/>
+          <text x="575" y="50" font-size="14" font-weight="800" fill="#C5310E" text-anchor="middle">コンピュートプレーン</text>
+          <text x="575" y="70" font-size="11.5" fill="#A8584A" text-anchor="middle">（データを実際に処理する側）</text>
+          <rect x="434" y="88" width="282" height="48" rx="7" fill="#fff" stroke="#E5E7EB"/>
+          <text x="575" y="107" font-size="12" font-weight="700" fill="#181A1F" text-anchor="middle">Classic：自社のクラウド内</text>
+          <text x="575" y="125" font-size="11" fill="#5C616B" text-anchor="middle">（例：自社のAWSアカウント／VPC）</text>
+          <rect x="434" y="144" width="282" height="48" rx="7" fill="#fff" stroke="#E5E7EB"/>
+          <text x="575" y="163" font-size="12" font-weight="700" fill="#181A1F" text-anchor="middle">Serverless：Databricks側</text>
+          <text x="575" y="181" font-size="11" fill="#5C616B" text-anchor="middle">（起動が速く運用をお任せ）</text>
+          <defs><marker id="b" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#FF3621"/></marker></defs>
+        </svg>
+        <figcaption>UI・管理はDatabricks側（コントロールプレーン）、計算とデータ処理はコンピュートプレーンで実行される</figcaption>
+      </figure>
+      <ul>
+        <li><strong>コントロールプレーン：</strong>画面・ジョブ管理・設定などDatabricksが運用するバックエンド。</li>
+        <li><strong>コンピュートプレーン（計算が走る場所）：</strong>
+          <ul>
+            <li><strong>Classic：</strong>計算リソースが<strong>自社のクラウドアカウント内</strong>で動く（ネットワークを自社で分離できる）。</li>
+            <li><strong>Serverless：</strong>計算リソースが<strong>Databricks側</strong>で動く（起動が速く、容量管理やパッチをお任せできる）。</li>
+          </ul>
+        </li>
+      </ul>
+      <div class="box note">
+        <div class="label">📌 用語メモ</div>
+        <p>旧称<strong>「データプレーン（Data Plane）」</strong>が現在の<strong>「コンピュートプレーン（Compute Plane）」</strong>に相当します（現行ドキュメントはCompute Planeで統一）。勉強会でどちらの語が出ても同じものを指していると考えてOKです。</p>
+      </div>
+      <p class="src">出典：<a href="https://docs.databricks.com/aws/en/getting-started/high-level-architecture" target="_blank" rel="noopener">High-level architecture（公式）</a></p>
+
+      <h3 id="medallion">3-6. メダリオンアーキテクチャ（データの段階的精製）</h3>
+      <p>レイクハウスでデータを整える際の<strong>定番の設計パターン</strong>。生データを段階的にきれいにしていく考え方で、勉強会でも頻出します。</p>
+      <div class="flow">
+        <div class="step b-bronze"><div class="t">🥉 Bronze</div><div class="d">生データをそのまま取り込む（原本保持）</div></div>
+        <div class="arrow">→</div>
+        <div class="step b-silver"><div class="t">🥈 Silver</div><div class="d">クレンジング・結合し整える（業務利用可）</div></div>
+        <div class="arrow">→</div>
+        <div class="step b-gold"><div class="t">🥇 Gold</div><div class="d">分析・BI・AI向けに集計した完成形</div></div>
+      </div>
+
+      <h3 id="multicloud">3-7. マルチクラウド対応</h3>
+      <p>Databricksは <strong>AWS・Microsoft Azure・Google Cloud</strong> のどこでも同じように動きます。プラットフォーム自体に本質的な差はなく、違いは各クラウドとの統合・課金方法にあります。</p>
+      <ul>
+        <li><strong>Azure Databricks：</strong>Microsoftの<strong>第一級（ファーストパーティ）サービス</strong>。Azureの請求に統合され、Microsoftエコシステムとの結びつきが強い。</li>
+        <li><strong>AWS / Google Cloud：</strong>サードパーティ統合として提供。それぞれS3／BigQuery等のネイティブサービスと相互運用できる。</li>
+      </ul>
+      <p class="src">出典：<a href="https://www.databricks.com/partners/cloud-partners" target="_blank" rel="noopener">Cloud Partners（公式）</a>／Azure版は <a href="https://learn.microsoft.com/en-us/azure/databricks/" target="_blank" rel="noopener">Microsoft Learn</a> に一次情報あり</p>
+
+      <h3 id="oss">3-8. オープンソース戦略</h3>
+      <p>Databricksの特徴は<strong>主要技術を積極的にオープンソース化</strong>している点です。「ベンダーロックインを避けたい」という顧客の要望に応える戦略で、競合との差別化にもなっています。</p>
+      <ul>
+        <li><strong>Apache Spark</strong>（分散処理）／<strong>Delta Lake</strong>（ストレージ）／<strong>MLflow</strong>（ML管理）はいずれもOSS。</li>
+        <li><strong>Unity Catalog も2024年6月にApache 2.0でOSS化</strong>（Linux Foundation傘下でホスト）。</li>
+        <li>データは標準形式（Delta/Parquet/Iceberg）で保存されるため、他のツールからも読める。</li>
+      </ul>
+      <p class="src">出典：<a href="https://www.databricks.com/blog/open-sourcing-unity-catalog" target="_blank" rel="noopener">Open Sourcing Unity Catalog（公式ブログ）</a></p>
+    </section>
+
+    <section id="data-eng">
+      <h2><span class="num">SECTION 4</span>データ活用（データ基盤・ETL）</h2>
+      <p class="lead">データを「集めて・整えて・流し続ける」ためのDatabricksの機能群です。2024年以降、これらは <strong>Lakeflow</strong> というブランドに統合されました。</p>
+      <div class="cards">
+        <div class="card"><span class="tag">取り込み</span><h4>Lakeflow Connect</h4><p>SQL Server・Salesforce・Workday等から、ノーコード／CDCでデータを取り込む。</p></div>
+        <div class="card"><span class="tag">取り込み</span><h4>Auto Loader</h4><p>クラウドストレージに届いたファイルを自動で検知し、増分だけ取り込む。大規模処理に強い。</p></div>
+        <div class="card"><span class="tag">変換</span><h4>Lakeflow Pipelines</h4><p>旧 <strong>Delta Live Tables（DLT）</strong>。宣言的にパイプラインを書くと、依存関係・スケーリング・品質チェックを自動化。</p></div>
+        <div class="card"><span class="tag">実行管理</span><h4>Lakeflow Jobs</h4><p>旧 <strong>Workflows</strong>。ノートブックやパイプラインをDAGで組み、スケジュール実行・監視する。</p></div>
+      </div>
+      <div class="box note">
+        <div class="label">📌 名称メモ</div>
+        <p>勉強会で <strong>「DLT」＝Lakeflow Pipelines</strong>、<strong>「Workflows」＝Lakeflow Jobs</strong> という旧称が出ることがあります。中身は連続しているので混乱しないように。</p>
+      </div>
+      <p class="src">出典：<a href="https://www.databricks.com/blog/introducing-databricks-lakeflow" target="_blank" rel="noopener">Introducing Lakeflow（公式ブログ）</a>／<a href="https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/" target="_blank" rel="noopener">Auto Loader（公式）</a></p>
+    </section>
+
+    <section id="ai">
+      <h2><span class="num">SECTION 5</span>AI活用(機械学習・生成AI)</h2>
+      <p class="lead">「データの隣でAIを動かせる」のがDatabricks最大の差別化ポイント。データを移動せず、ガバナンスを効かせたままAI/MLを開発・運用できます。</p>
+      <h3>機械学習の土台：MLflow</h3>
+      <p>Databricks発のOSSで、機械学習の<strong>実験管理・モデル管理・MLOps</strong>のデファクト標準。「どのデータ・パラメータでどの精度が出たか」を記録し、モデルを本番にデプロイ・監視するまでを一貫管理します。</p>
+      <h3>生成AIの中核：Mosaic AI</h3>
+      <p>MosaicML買収を土台にした生成AI機能群。<strong>自社データを使ったAIアプリ</strong>を作る道具がそろっています。</p>
+      <div class="cards">
+        <div class="card"><h4>Model Serving</h4><p>自社モデルや基盤モデルをAPIとして提供。</p></div>
+        <div class="card"><h4>Vector Search</h4><p>RAGの中核。社内文書をベクトル化し、Deltaと自動同期して常に最新を検索。</p></div>
+        <div class="card"><h4>Agent Framework</h4><p>RAGアプリやAIエージェントの構築・評価・運用（LLMOps）。</p></div>
+        <div class="card"><h4>AI Gateway</h4><p>LLM利用の統制。使用量・レート制限・PII検出・コスト把握。</p></div>
+      </div>
+      <h3>誰でも使えるAI：AI/BI</h3>
+      <ul>
+        <li><strong>Genie：</strong>自然言語（日本語の質問など）でデータに問い合わせ、その場で分析・可視化できる。非エンジニアの活用を広げる。</li>
+        <li><strong>Databricks Assistant：</strong>コード生成や説明を助けるAIコパイロット。</li>
+      </ul>
+      <h3>自社LLM：DBRX</h3>
+      <p>2024年3月公開の自社製オープンLLM。<strong>Mixture-of-Experts（MoE）</strong>方式で、総パラメータ1,320億のうちトークンあたり360億だけを使う効率的な設計。「オープンで高性能なモデルを提供できる会社」という技術力の象徴です。</p>
+      <div class="box tip">
+        <div class="label">💡 生成AI活用の典型像（RAG）</div>
+        <p>「<strong>社内データ（Delta Lake）→ Vector Searchでインデックス化 → 質問に関連する情報を取得 → LLMに渡して回答生成 → AI Gateway/Unity Catalogで統制</strong>」という流れを、すべて同じ基盤・同じガバナンスの中で組めるのがDatabricksの売りです。</p>
+      </div>
+      <p class="src">出典：<a href="https://docs.databricks.com/aws/en/generative-ai/guide/mosaic-ai-gen-ai-capabilities" target="_blank" rel="noopener">Mosaic AI generative AI capabilities（公式）</a>／<a href="https://www.databricks.com/blog/announcing-dbrx-new-standard-efficient-open-source-customizable-llms" target="_blank" rel="noopener">Announcing DBRX（公式ブログ）</a></p>
+    </section>
+
+    <section id="strengths">
+      <h2><span class="num">SECTION 6</span>強み（評価される点）</h2>
+      <div class="cards">
+        <div class="card"><span class="tag">統合</span><h4>データ＋AIの一気通貫</h4><p>整備・分析・ML・生成AIを1基盤で。データを移動せずAIに使える。</p></div>
+        <div class="card"><span class="tag">性能</span><h4>大規模処理に強い</h4><p>Spark/Photonにより大規模ETL・分散処理で高い性能とコスト効率。</p></div>
+        <div class="card"><span class="tag">信頼性</span><h4>Delta Lakeの品質</h4><p>ACID・タイムトラベルでデータレイクにDWH級の信頼性。</p></div>
+        <div class="card"><span class="tag">開放性</span><h4>オープン＆マルチクラウド</h4><p>標準形式＋3クラウド対応でロックインが少ない。</p></div>
+        <div class="card"><span class="tag">ガバナンス</span><h4>Unity Catalogで一元管理</h4><p>アクセス制御・リネージ・監査を統一。組織展開がしやすい。</p></div>
+        <div class="card"><span class="tag">AI評価</span><h4>AI/MLで業界トップ評価</h4><p>Gartnerのデータサイエンス＆ML分野でリーダー評価。生成AI対応が厚い。</p></div>
+      </div>
+      <p class="src">出典：<a href="https://www.databricks.com/blog/databricks-named-leader-2025-gartner-magic-quadrant-data-science-and-machine-learning" target="_blank" rel="noopener">Gartner Magic Quadrant（DSML）2025 リーダー（公式ブログ）</a>／第三者レビュー各種</p>
+    </section>
+
+    <section id="weaknesses">
+      <h2><span class="num">SECTION 7</span>弱み・課題・注意点</h2>
+      <p class="lead">導入を検討するうえで現実的に知っておくべき「つまずきどころ」です（第三者レビューを含む客観的評価）。</p>
+      <div class="pc">
+        <div class="col cons">
+          <h4>⚠️ よく指摘される弱み</h4>
+          <ul>
+            <li><strong>学習コストが高い：</strong>機能が多く、エンジニア前提の作り。初学者には急な学習曲線。</li>
+            <li><strong>コスト管理が難しい：</strong>従量課金＋自動スケールで、油断すると費用が膨らみやすい。予測が難しい。</li>
+            <li><strong>初期セットアップが複雑：</strong>クラウド連携・ネットワーク・権限設計など考慮点が多い。</li>
+            <li><strong>非エンジニアには敷居が高い：</strong>ノーコードのBI専用ツールに比べると、一般ユーザーが使いこなしにくい面。</li>
+            <li><strong>クラウド/リージョン差：</strong>新機能の提供時期や対応がクラウド・地域で異なる場合がある。</li>
+            <li><strong>専門人材が必要：</strong>SQL＋Python/Scala＋ML/データ基盤の知識を持つ人材・体制が要る。</li>
+          </ul>
+        </div>
+        <div class="col pros">
+          <h4>✅ 弱みへの向き合い方</h4>
+          <ul>
+            <li>Serverlessや既定のテンプレートで<strong>セットアップを簡素化</strong>できる。</li>
+            <li>予算アラート・タグ付け・ジョブ用コンピュートの活用で<strong>コストのガードレール</strong>を敷ける。</li>
+            <li>Genie/AssistantなどAI支援で<strong>非エンジニアの利用</strong>を補える。</li>
+            <li>小さく始めて（PoC）<strong>段階的に拡大</strong>するのが定石。</li>
+            <li>公式トレーニング・認定資格で<strong>スキルを計画的に獲得</strong>。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="box warn">
+        <div class="label">⚠️ 一番のリアル課題は「コスト」</div>
+        <p>第三者レビューで最も繰り返し挙がるのが<strong>コストの読みにくさ</strong>です。勉強会では「コストを予測・最適化する具体策」「サーバーレスとクラシックの使い分け」を必ず聞いておくと実務で効きます（→ <a href="#questions">11章</a> に質問例）。</p>
+      </div>
+    </section>
+
+    <section id="compare">
+      <h2><span class="num">SECTION 8</span>競合比較と立ち位置</h2>
+      <p class="lead">「Databricks vs ○○」は勉強会で必ず話題になります。重要なのは<strong>「どれか一つを選ぶ」ではなく「ワークロードごとに使い分け・併用する」</strong>のが2026年の主流という点です。</p>
+      <h3>8-1. Databricks vs Snowflake（最大の比較対象）</h3>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>観点</th><th>Databricks</th><th>Snowflake</th></tr></thead>
+          <tbody>
+            <tr><td>出自・設計</td><td>レイクハウス（Spark由来）。データは自社ストレージにオープン形式</td><td>クラウドDWH。Snowflake管理環境内（近年Icebergで外部形式も）</td></tr>
+            <tr><td>得意領域</td><td><strong>ML/AI・大規模ETL・ストリーミング・非構造化</strong></td><td><strong>SQL分析・BI・高同時実行</strong></td></tr>
+            <tr><td>使いやすさ</td><td>コード中心。エンジニア向けで学習曲線が急</td><td>SQL中心。アナリストに優しくプラグ＆プレイ</td></tr>
+            <tr><td>コスト傾向</td><td>大規模ETLで有利になりやすい</td><td>SQL分析でシンプル・運用が軽い</td></tr>
+            <tr><td>ロックイン</td><td>少なめ（オープン形式）</td><td>されやすい（近年改善）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box note">
+        <div class="label">📌 一行で言うと</div>
+        <p><strong>「AI・大規模データ処理ならDatabricks、SQL分析・BIの手軽さならSnowflake」</strong>。両者は機能を相互に拡張中で境界は曖昧になりつつあります。</p>
+      </div>
+      <h3>8-2. AWSとの関係 ―「パートナーでもあり競合でもある」</h3>
+      <p>DatabricksはAWS上で動く（＝S3・IAM・VPCと統合するパートナー）一方で、AWS自身のネイティブサービスとは機能が重なります。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>役割</th><th>AWSネイティブ</th><th>Databricksの立ち位置</th></tr></thead>
+          <tbody>
+            <tr><td>DWH/SQL分析</td><td>Redshift / Athena</td><td>Databricks SQLが対抗。ただしSQL専用ならRedshift/Athenaが手軽な面も</td></tr>
+            <tr><td>分散処理(Spark)</td><td>EMR</td><td>Spark最適化・UI・ガバナンスでDatabricksが優位とされる</td></tr>
+            <tr><td>ETL/カタログ</td><td>Glue</td><td>Lakeflow＋Unity Catalogが対抗（Glue連携も可能）</td></tr>
+            <tr><td>機械学習</td><td>SageMaker</td><td>MLflow＋Mosaic AIが対抗</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ポイントは<strong>「単一のAWSサービスでDatabricks全体を置き換えられるものはない」</strong>こと。AWS派は EMR＋Glue＋SageMaker＋Lake Formation の組み合わせで近いことができますが、統合度・運用の手間で差が出ます。</p>
+      <h3>8-3. Google Cloudとの関係</h3>
+      <p>同様に、GCP上で動く一方、<strong>BigQuery（サーバーレスDWH）</strong>や <strong>Vertex AI（ML/生成AI）</strong> と競合します。実務では「Databricks＝データエンジニアリング/ETL/レイクハウス」「BigQuery/Vertex＝サーバーレスSQL分析・基盤モデル」と<strong>役割分担で併用</strong>する企業が多い、という整理がよくされます。</p>
+      <h3>8-4. Azure / Microsoft Fabric との関係</h3>
+      <p>前述のとおり <strong>Azure Databricksはマイクロソフトの第一級サービス</strong>で、両社は戦略提携を継続。Microsoftの統合分析基盤 <strong>Fabric</strong> とは「直接対決」というより<strong>役割分担</strong>（Fabric＝全社向けの手軽な分析/BI、Databricks＝大規模エンジニアリング・カスタムML）。Unity CatalogとOneLakeの連携など、共存の動きも進んでいます。</p>
+      <h3>8-5. 結局どう選ぶ？（向き／不向き）</h3>
+      <div class="pc">
+        <div class="col pros">
+          <h4>✅ Databricksが向くケース</h4>
+          <ul>
+            <li>大規模ETL・複雑なパイプライン・ストリーミング</li>
+            <li>ML/AI・生成AIが主目的(データの隣でAIを動かしたい)</li>
+            <li>データとAIの統一ガバナンスが必要</li>
+            <li>オープン形式重視・マルチクラウド・ロックイン回避</li>
+            <li>コードファーストなエンジニアチームがいる</li>
+          </ul>
+        </div>
+        <div class="col cons">
+          <h4>⚠️ 他が手軽なケース</h4>
+          <ul>
+            <li>目的がSQL分析・BIダッシュボード中心 → Snowflake / BigQueryが手軽</li>
+            <li>専任のデータエンジニアが乏しい → 学習コストが重荷に</li>
+            <li>すでに特定クラウドのネイティブ構成で完結している</li>
+          </ul>
+        </div>
+      </div>
+      <p class="src">出典：<a href="https://www.flexera.com/blog/finops/snowflake-vs-databricks/" target="_blank" rel="noopener">Flexera: Snowflake vs Databricks</a>／<a href="https://technologymatch.com/blog/snowflake-vs-databricks-vs-bigquery-a-guide-for-it-leaders-in-2026" target="_blank" rel="noopener">3製品比較ガイド（2026）</a>／各クラウド公式ブログ（中立性のため複数ソースを参照）</p>
+    </section>
+
+    <section id="pricing">
+      <h2><span class="num">SECTION 9</span>料金の基礎（DBU）</h2>
+      <p class="lead">Databricksのコストは「分かりにくい」と言われがちですが、<strong>二層構造</strong>と <strong>DBU</strong> という考え方を押さえれば見通せます。</p>
+      <div class="box key">
+        <div class="label">💰 コストの基本式</div>
+        <p style="font-size:16px;"><strong>総コスト ＝ ① クラウドのインフラ費用（VM・ストレージ等：クラウド事業者へ）＋ ② Databricks利用料（消費したDBU × DBU単価：Databricksへ）</strong></p>
+      </div>
+      <h4>DBU（Databricks Unit）とは</h4>
+      <p>処理能力を正規化した<strong>従量課金の単位</strong>。インスタンス種別やクラウドが違っても一貫して計量でき、<strong>秒単位</strong>で消費されます。「処理パワーをどれだけ使ったか」のメーターだとイメージしてください。</p>
+      <h4>ワークロードで単価が変わる</h4>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>ワークロード種別</th><th>用途</th><th>単価の傾向</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Jobs Compute</strong></td><td>自動化・スケジュール実行のETL</td><td>最も安い</td></tr>
+            <tr><td><strong>All-Purpose Compute</strong></td><td>対話的なノートブック開発</td><td>Jobsの2〜3倍と高め</td></tr>
+            <tr><td><strong>SQL（SQL Warehouse）</strong></td><td>SQL分析・BI（Serverless/Pro/Classic）</td><td>タイプで差</td></tr>
+            <tr><td><strong>Pipelines（DLT）等</strong></td><td>宣言的パイプライン</td><td>専用単価</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box tip">
+        <div class="label">💡 コスト最適化の勘所</div>
+        <ul style="margin:4px 0;">
+          <li>本番の定期処理は<strong>安いJobs Compute</strong>で。開発の高いAll-Purposeを動かしっぱなしにしない（自動終了を設定）。</li>
+          <li>プラン階層（Standard/Premium/Enterprise）でも単価が変わる。</li>
+          <li><strong>具体的な単価は変動が激しい</strong>ので、必ず<a href="https://www.databricks.com/product/pricing" target="_blank" rel="noopener">公式の料金ページ</a>で最新を確認。</li>
+        </ul>
+      </div>
+      <p class="src">出典：<a href="https://www.databricks.com/product/pricing" target="_blank" rel="noopener">Databricks Pricing（公式）</a>／<a href="https://www.cloudzero.com/blog/databricks-pricing/" target="_blank" rel="noopener">CloudZero: Databricks Pricing</a>（単価の参考値は第三者まとめ・要変動注意）</p>
+    </section>
+
+    <section id="glossary">
+      <h2><span class="num">SECTION 10</span>用語チートシート</h2>
+      <p class="lead">勉強会中に「あれ何だっけ？」となったら、ここを見れば思い出せます。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>用語</th><th>ひとことで</th></tr></thead>
+          <tbody>
+            <tr><td><strong>レイクハウス</strong></td><td>DWHとデータレイクを統合した、Databricksの中心思想</td></tr>
+            <tr><td><strong>Apache Spark</strong></td><td>大規模データを高速処理する分散エンジン。Databricksの源流</td></tr>
+            <tr><td><strong>Delta Lake</strong></td><td>データレイクにACID・タイムトラベルを足す土台技術</td></tr>
+            <tr><td><strong>Iceberg / UniForm</strong></td><td>もう一つのオープン形式と、Deltaを外部Icebergから読めるようにする仕組み</td></tr>
+            <tr><td><strong>Unity Catalog</strong></td><td>データ＆AIの統一ガバナンス（権限・リネージ・監査）</td></tr>
+            <tr><td><strong>Photon</strong></td><td>C++製の高速クエリエンジン</td></tr>
+            <tr><td><strong>Databricks SQL / SQL Warehouse</strong></td><td>レイクハウス上でDWH的にSQL分析する機能とその計算基盤</td></tr>
+            <tr><td><strong>コントロール/コンピュートプレーン</strong></td><td>管理側（Databricks）と、計算が走る側（自社 or Databricks）</td></tr>
+            <tr><td><strong>メダリオン</strong></td><td>Bronze→Silver→Goldでデータを段階的に精製する設計</td></tr>
+            <tr><td><strong>Lakeflow</strong></td><td>データ取り込み〜変換〜実行管理の統合ブランド（旧DLT/Workflows含む）</td></tr>
+            <tr><td><strong>Auto Loader</strong></td><td>クラウドに届いたファイルを自動・増分で取り込む</td></tr>
+            <tr><td><strong>MLflow</strong></td><td>機械学習の実験・モデル管理のOSS標準</td></tr>
+            <tr><td><strong>Mosaic AI</strong></td><td>生成AI機能群（Serving / Vector Search / Agent / Gateway）</td></tr>
+            <tr><td><strong>Genie</strong></td><td>自然言語でデータに質問できるAI/BI機能</td></tr>
+            <tr><td><strong>DBRX</strong></td><td>Databricks自社のオープンLLM（MoE方式）</td></tr>
+            <tr><td><strong>Lakebase</strong></td><td>Neon由来のサーバーレスPostgres（運用DB＝OLTP領域へ拡張）</td></tr>
+            <tr><td><strong>DBU</strong></td><td>処理量の課金単位。Databricks利用料のメーター</td></tr>
+            <tr><td><strong>RAG</strong></td><td>社内データを検索してLLMに渡し、根拠ある回答を作る手法</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="questions">
+      <h2><span class="num">SECTION 11</span>勉強会で聞くと良い質問</h2>
+      <p class="lead">「有意義な勉強会にする」ための、初学者でも刺さる質問例です。自社のデータ／AI活用に引きつけて聞くと学びが深まります。</p>
+      <div class="qgrid">
+        <div class="qcard"><h4><span class="ic">🚀</span>導入・進め方</h4>
+          <ul>
+            <li>スモールスタートの最小構成は？ PoCから本番までの典型ステップは？</li>
+            <li>既存DWH（例：当社の○○）からの移行はどんな流れ・期間？</li>
+            <li>導入に必要なスキルセット・チーム体制は？ おすすめの学習リソース・認定資格は？</li>
+          </ul>
+        </div>
+        <div class="qcard"><h4><span class="ic">💰</span>コスト</h4>
+          <ul>
+            <li>DBUコストを予測・最適化するベストプラクティスは？</li>
+            <li>Serverlessとクラシックの使い分けの判断軸は？</li>
+            <li>コスト急増を防ぐガードレール（予算アラート・タグ付け）は？</li>
+          </ul>
+        </div>
+        <div class="qcard"><h4><span class="ic">🏛️</span>アーキ・ガバナンス</h4>
+          <ul>
+            <li>Unity Catalogはマルチクラウド／既存カタログのデータも一元管理できる？</li>
+            <li>DeltaとIceberg、今後どちらに寄せるべき？ Iceberg readsの実運用上の制約は？</li>
+            <li>個人情報のマスキングや監査は具体的にどう実現する？</li>
+          </ul>
+        </div>
+        <div class="qcard"><h4><span class="ic">🤖</span>AI・生成AI</h4>
+          <ul>
+            <li>自社データでRAG／エージェントを作る典型構成と注意点は？</li>
+            <li>Vector Searchの精度・コスト感は？ 更新はどう同期する？</li>
+            <li>Mosaic AIと外部LLM（Claude等）はどう併用？ AI Gatewayでの統制は？</li>
+          </ul>
+        </div>
+        <div class="qcard"><h4><span class="ic">⚖️</span>他社比較・併用</h4>
+          <ul>
+            <li>Snowflake／BigQueryと併用する企業の典型的な役割分担は？</li>
+            <li>「Databricksを選ぶべきでない」のはどんなケース？（正直な線引き）</li>
+          </ul>
+        </div>
+        <div class="qcard"><h4><span class="ic">🔭</span>最新動向</h4>
+          <ul>
+            <li>Lakebase（OLTP）は既存RDBMSをどこまで置き換える想定？</li>
+            <li>直近のロードマップで、初学者がまず触るべき機能は？（→ Summit速報タブも参照）</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="refs">
+      <h2><span class="num">SECTION 12</span>参考リンク（出典）</h2>
+      <div class="reflist">
+        <h4>公式（一次情報）</h4>
+        <ul>
+          <li><a href="https://www.databricks.com/" target="_blank" rel="noopener">Databricks 公式サイト</a> ／ <a href="https://docs.databricks.com/" target="_blank" rel="noopener">公式ドキュメント</a></li>
+          <li><a href="https://www.databricks.com/company/founders" target="_blank" rel="noopener">創業者ページ</a> ／ <a href="https://www.databricks.com/company/about-us" target="_blank" rel="noopener">About us</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/lakehouse" target="_blank" rel="noopener">レイクハウスとは</a> ／ <a href="https://docs.databricks.com/aws/en/getting-started/high-level-architecture" target="_blank" rel="noopener">アーキテクチャ概要</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/delta/" target="_blank" rel="noopener">Delta Lake</a> ／ <a href="https://docs.databricks.com/aws/en/delta/uniform" target="_blank" rel="noopener">Iceberg reads（UniForm）</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/data-governance/unity-catalog/" target="_blank" rel="noopener">Unity Catalog</a> ／ <a href="https://www.databricks.com/blog/open-sourcing-unity-catalog" target="_blank" rel="noopener">Unity Catalog OSS化</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/compute/photon" target="_blank" rel="noopener">Photon</a> ／ <a href="https://docs.databricks.com/aws/en/sql/" target="_blank" rel="noopener">Databricks SQL</a></li>
+          <li><a href="https://www.databricks.com/blog/introducing-databricks-lakeflow" target="_blank" rel="noopener">Lakeflow</a> ／ <a href="https://docs.databricks.com/aws/en/mlflow/" target="_blank" rel="noopener">MLflow</a></li>
+          <li><a href="https://docs.databricks.com/aws/en/generative-ai/guide/mosaic-ai-gen-ai-capabilities" target="_blank" rel="noopener">Mosaic AI（生成AI機能）</a> ／ <a href="https://www.databricks.com/blog/announcing-dbrx-new-standard-efficient-open-source-customizable-llms" target="_blank" rel="noopener">DBRX</a></li>
+          <li><a href="https://www.databricks.com/product/pricing" target="_blank" rel="noopener">料金（Pricing）</a></li>
+        </ul>
+        <h4>第三者・比較（客観評価の参考）</h4>
+        <ul>
+          <li><a href="https://en.wikipedia.org/wiki/Databricks" target="_blank" rel="noopener">Wikipedia: Databricks</a></li>
+          <li><a href="https://www.flexera.com/blog/finops/snowflake-vs-databricks/" target="_blank" rel="noopener">Flexera: Snowflake vs Databricks</a> ／ <a href="https://www.cloudzero.com/blog/databricks-pricing/" target="_blank" rel="noopener">CloudZero: Pricing</a></li>
+          <li><a href="https://technologymatch.com/blog/snowflake-vs-databricks-vs-bigquery-a-guide-for-it-leaders-in-2026" target="_blank" rel="noopener">Snowflake vs Databricks vs BigQuery（2026）</a></li>
+          <li><a href="https://www.gartner.com/reviews/market/data-science-and-machine-learning-platforms/vendor/databricks" target="_blank" rel="noopener">Gartner Peer Insights: Databricks</a></li>
+        </ul>
+      </div>
+      <footer>
+        <p><strong>免責・注意：</strong>本資料は2026年6月時点の公開情報をもとに、初学者の事前学習用に作成したものです。Databricksは製品名・機能・価格の変更が速く、評価額・売上・従業員数・IPO時期などは報道ベースで変動します。実務判断の際は必ず<a href="https://docs.databricks.com/" target="_blank" rel="noopener">公式ドキュメント</a>および最新の一次情報をご確認ください。</p>
+      </footer>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- DOC 2 : 学習リソース集                                          -->
+<!-- ============================================================= -->
+<div class="doc" id="doc-learn">
+  <header class="hero h-learn">
+    <div class="inner">
+      <span class="kicker">Learning Resources ― 入門 → 基礎 → 中級</span>
+      <h1>Databricks を体系的に学ぶ<br>リソース集（厳選URL）</h1>
+      <p>公式ドキュメントだけでなく、Qiita・Zenn・classmethod など日本語の良質なナレッジも含めて、「手を動かしながら段階的に学べる」順に整理しました。全URLは2026年6月17日時点で実在を確認済みです。</p>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <section>
+      <h2><span class="num">ROADMAP</span>学習ロードマップ</h2>
+      <p class="lead">「何から手を付ければ？」の指針です。<strong>無料環境で手を動かす → 公式＋日本語記事で基礎を固める → 資格や実務テーマで中級へ</strong>。</p>
+      <div class="flow">
+        <div class="step s-intro">
+          <div class="t">🟢 入門（まず触る）</div>
+          <ul><li>Free Editionで無料環境を作る</li><li>「はじめてのDatabricks」で一周</li><li>公式Get Started / Fundamentals動画</li></ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="step s-basic">
+          <div class="t">🔵 基礎（仕組みを理解）</div>
+          <ul><li>Microsoft Learn（日本語・体系）</li><li>Big Bookシリーズ（無料eBook）</li><li>Data Engineer Associate 資格学習</li></ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="step s-mid">
+          <div class="t">🔴 中級（実務・専門）</div>
+          <ul><li>dbdemosでE2E実装</li><li>classmethod「やってみた」で応用</li><li>Professional / GenAI 資格・定番書</li></ul>
+        </div>
+      </div>
+      <div class="box key">
+        <div class="label">⭐ 迷ったらこの4つから</div>
+        <p>① <a href="https://www.databricks.com/learn/free-edition" target="_blank" rel="noopener">Free Edition</a>（無料環境）→ ② <a href="https://qiita.com/taka_yayoi/items/8dc72d083edb879a5e5d" target="_blank" rel="noopener">はじめてのDatabricks（Qiita）</a>→ ③ <a href="https://learn.microsoft.com/ja-jp/azure/databricks/" target="_blank" rel="noopener">Microsoft Learn 日本語ドキュメント</a>→ ④ <a href="https://jedai.connpass.com/" target="_blank" rel="noopener">JEDAI（日本ユーザー会）</a>のもくもく会で継続。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 1</span>まず手を動かす環境（ハンズオン）</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">無料環境</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/free-edition" target="_blank" rel="noopener">Databricks Free Edition</a></div>
+          <div class="desc">クレカ不要・無料のワークスペース。学習/試作の入口（旧Community Editionの後継）。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">無料環境</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/try-databricks" target="_blank" rel="noopener">Try Databricks</a></div>
+          <div class="desc">14日間の無料トライアル or Free Edition を選べる総合入口。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">デモ</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/demos/tutorials" target="_blank" rel="noopener">Databricks Demos & Tutorials（dbdemos）</a></div>
+          <div class="desc">1行コードでDLT/MLOps/ガバナンス等のエンドツーエンドのデモをワークスペースに展開できる。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">コード</span></div>
+          <div class="ttl"><a href="https://github.com/databricks-demos/dbdemos-notebooks" target="_blank" rel="noopener">dbdemos-notebooks（GitHub）</a></div>
+          <div class="desc">dbdemosのノートブックソース。中身を直接読んで学びたい人向け。</div>
+          <div class="host">github.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 2</span>公式の入門ドキュメント</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">ドキュメント</span></div>
+          <div class="ttl"><a href="https://docs.databricks.com/aws/en/getting-started/" target="_blank" rel="noopener">Get started tutorials</a></div>
+          <div class="desc">クエリ・可視化、CSV取込、ガバナンス、ML、AIなど入門チュートリアル群の入口。</div>
+          <div class="host">docs.databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">ドキュメント</span></div>
+          <div class="ttl"><a href="https://docs.databricks.com/aws/en/getting-started/quick-start" target="_blank" rel="noopener">Tutorial: Query and visualize data from a notebook</a></div>
+          <div class="desc">ノートブックでのクエリ＆可視化を最短で体験する定番チュートリアル。</div>
+          <div class="host">docs.databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip ty">ドキュメント</span></div>
+          <div class="ttl"><a href="https://docs.databricks.com/aws/en/getting-started/ml-get-started" target="_blank" rel="noopener">Build your first machine learning model</a></div>
+          <div class="desc">scikit-learn＋MLflowで初めての機械学習モデルを構築する。</div>
+          <div class="host">docs.databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">ハブ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn" target="_blank" rel="noopener">Learn Databricks（学習ハブ）</a></div>
+          <div class="desc">トレーニング・資格・ワークショップへの総合入口。</div>
+          <div class="host">databricks.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 3</span>無料トレーニング & 動画</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">セルフペース</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://customer-academy.databricks.com/learn" target="_blank" rel="noopener">Databricks Academy</a></div>
+          <div class="desc">無料セルフペース・コースとLearning Pathの本体（「Customer and Prospects」で登録）。主に英語。</div>
+          <div class="host">customer-academy.databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">動画</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/learn/training/databricks-fundamentals" target="_blank" rel="noopener">Databricks Fundamentals（動画）</a></div>
+          <div class="desc">プラットフォーム全体像を掴む無料の入門動画シリーズ。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-basic">基礎</span><span class="chip ty">ワークショップ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/training/workshop" target="_blank" rel="noopener">Free Hands-On Workshops</a></div>
+          <div class="desc">専門家主導の無料バーチャル・ワークショップ（ラボ付き）。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">YouTube</span></div>
+          <div class="ttl"><a href="https://www.youtube.com/@Databricks" target="_blank" rel="noopener">Databricks 公式YouTube</a></div>
+          <div class="desc">製品紹介・チュートリアル・解説の公式メインチャンネル（自動字幕で日本語化可）。</div>
+          <div class="host">youtube.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">YouTube</span></div>
+          <div class="ttl"><a href="https://www.youtube.com/@Databricks-Events" target="_blank" rel="noopener">Databricks Events（YouTube）</a></div>
+          <div class="desc">Data+AI Summit等のセッション・ウェビナーの公式チャンネル。</div>
+          <div class="host">youtube.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 4</span>日本語ナレッジ ① Qiita</h2>
+      <p class="lead">日本語Databricks情報の中心地。特に <strong>Databricks Japan の弥生隆明氏（@taka_yayoi）</strong> の記事群が翻訳・解説ともに充実しており、迷ったらここがおすすめです。</p>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">ハブ</span></div>
+          <div class="ttl"><a href="https://qiita.com/tags/databricks" target="_blank" rel="noopener">Qiita Databricksタグ</a></div>
+          <div class="desc">日本語Databricks記事のハブ（4,000件超）。人気記事を辿れる。</div>
+          <div class="host">qiita.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">記事</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://qiita.com/taka_yayoi/items/8dc72d083edb879a5e5d" target="_blank" rel="noopener">はじめてのDatabricks（@taka_yayoi）</a></div>
+          <div class="desc">Free Edition前提の定番入門。2026年1月更新で最新機能まで反映済み。</div>
+          <div class="host">qiita.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">記事</span></div>
+          <div class="ttl"><a href="https://qiita.com/taka_yayoi/items/8511ef61498a31734b00" target="_blank" rel="noopener">Databricks入門：データとAIを統合する次世代プラットフォーム</a></div>
+          <div class="desc">レイクハウス/Genie/Mosaic AIなど全体像を俯瞰できる。</div>
+          <div class="host">qiita.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">カリキュラム</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://qiita.com/taka_yayoi/items/1fe076a0f87a7442d39a" target="_blank" rel="noopener">Databricks初心者のための完全学習ガイド</a></div>
+          <div class="desc">レベル0〜6の段階的カリキュラム。Spark/Delta/MLflowからRAG/LLMまで。2025年11月更新。</div>
+          <div class="host">qiita.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">ハンズオン</span></div>
+          <div class="ttl"><a href="https://qiita.com/taka_yayoi/items/bfca00976da366239987" target="_blank" rel="noopener">はじめてのDatabricks もくもく会 完全ガイド</a></div>
+          <div class="desc">JEDAIもくもく会の教材ガイド。3レベルのハンズオン教材へ誘導。</div>
+          <div class="host">qiita.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">索引</span></div>
+          <div class="ttl"><a href="https://qiita.com/taka_yayoi/items/c6907e2b861cb1070f4d" target="_blank" rel="noopener">Databricks記事のまとめページ</a></div>
+          <div class="desc">数百記事のインデックス。人気度マーク付きで読みたいテーマを探せる。2026年6月更新。</div>
+          <div class="host">qiita.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 5</span>日本語ナレッジ ② Zenn / classmethod / スライド</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">Zenn</span></div>
+          <div class="ttl"><a href="https://zenn.dev/topics/databricks" target="_blank" rel="noopener">Zenn Databricksトピック</a></div>
+          <div class="desc">記事350件超・本も。トレンド/全期間で良記事を探せる。</div>
+          <div class="host">zenn.dev</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">Zenn</span></div>
+          <div class="ttl"><a href="https://zenn.dev/manabian" target="_blank" rel="noopener">manabian氏の記事一覧（Zenn）</a></div>
+          <div class="desc">PySpark/Spark SQL/Databricks Academy整理など実践ナレッジの著者ページ。</div>
+          <div class="host">zenn.dev</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">ブログ</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://dev.classmethod.jp/tags/databricks/" target="_blank" rel="noopener">classmethod DevelopersIO（Databricksタグ）</a></div>
+          <div class="desc">「やってみた」系の実践記事が豊富。新機能検証が速く更新頻度が高い。</div>
+          <div class="host">dev.classmethod.jp</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip ty">スライド</span></div>
+          <div class="ttl"><a href="https://speakerdeck.com/taka_aki/hanzuondexue-bu-databricks-jhazimetedatabricks" target="_blank" rel="noopener">ハンズオンで学ぶ Databricks ― はじめてのDatabricks</a></div>
+          <div class="desc">座学＋ハンズオン構成。Unity Catalog/ノートブック/pandas vs PySpark。2025年3月。</div>
+          <div class="host">speakerdeck.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">スライド</span></div>
+          <div class="ttl"><a href="https://speakerdeck.com/taka_aki/databricks-free-editionjiang-zuo-detaenziniaringubian" target="_blank" rel="noopener">Databricks Free Edition講座 データエンジニアリング編</a></div>
+          <div class="desc">Spark基礎→Lakeflow宣言型パイプライン→実践演習。2026年1月公開（最新）。</div>
+          <div class="host">speakerdeck.com</div>
+        </div>
+      </div>
+      <div class="box note">
+        <div class="label">📌 「Community Edition」と書かれた古い記事に注意</div>
+        <p>2026年時点で Community Edition は廃止され <strong>Free Edition</strong> に置き換わっています。古い記事で「Community Edition」を見たら Free Edition に読み替えてください。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 6</span>Microsoft Learn（日本語・公式で体系的）</h2>
+      <p class="lead">日本語で・無料で・体系的に学べる点で非常に優秀。Azure Databricks版ですが、中身はDatabricks共通の概念がほとんどです。</p>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">ドキュメント</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://learn.microsoft.com/ja-jp/azure/databricks/" target="_blank" rel="noopener">Azure Databricks ドキュメント（日本語）</a></div>
+          <div class="desc">「Databricksとは」「レイクハウスとは」から始まる公式日本語ドキュメントの入口。</div>
+          <div class="host">learn.microsoft.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">ラーニングパス</span></div>
+          <div class="ttl"><a href="https://learn.microsoft.com/ja-jp/training/paths/data-engineer-azure-databricks/" target="_blank" rel="noopener">データ分析ソリューションを実装する</a></div>
+          <div class="desc">全6モジュール。Spark/Delta Lake/パイプライン/Unity Catalogを段階的に習得。</div>
+          <div class="host">learn.microsoft.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">ラーニングパス</span></div>
+          <div class="ttl"><a href="https://learn.microsoft.com/ja-jp/training/paths/build-operate-machine-learning-solutions-azure-databricks/" target="_blank" rel="noopener">機械学習ソリューションを実装する</a></div>
+          <div class="desc">ML向け。Python/scikit-learn/PyTorch経験者向けの実装パス。</div>
+          <div class="host">learn.microsoft.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 7</span>無料電子書籍（Big Book シリーズ）</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">eBook</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/ebook/big-book-of-data-engineering" target="_blank" rel="noopener">The Big Book of Data Engineering</a></div>
+          <div class="desc">DLT/Unity Catalog/Lakeflow/ストリーミングでのパイプライン構築を網羅。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">eBook</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/ebook/the-big-book-of-mlops" target="_blank" rel="noopener">The Big Book of MLOps</a></div>
+          <div class="desc">MLOps/LLMOpsの原則と参照アーキテクチャ。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">eBook</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/ebook/big-book-generative-ai" target="_blank" rel="noopener">The Big Book of Generative AI</a></div>
+          <div class="desc">基盤モデル選定→RAG→評価→デプロイまで生成AIの全工程。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-basic">基礎</span><span class="chip ty">eBook</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/resources/ebook/tap-full-potential-llm" target="_blank" rel="noopener">A Compact Guide to Large Language Models</a></div>
+          <div class="desc">LLM/NLPの要点を簡潔にまとめた入門eBook。</div>
+          <div class="host">databricks.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 8</span>認定資格（学習の目標設定に）</h2>
+      <p class="lead">「何を学べば良いか」の地図として、資格の試験範囲は良いガイドになります。まずは <strong>Data Engineer Associate</strong> か <strong>Data Analyst Associate</strong> が定番。</p>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">資格ハブ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/training/certification" target="_blank" rel="noopener">Databricks Certification（資格トップ）</a></div>
+          <div class="desc">全資格の一覧・概要ハブ。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip ty">資格</span><span class="star">★定番</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/certification/data-engineer-associate" target="_blank" rel="noopener">Data Engineer Associate</a></div>
+          <div class="desc">ETL/Lakeflow/ガバナンスなどDEの基礎を問う入門資格。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip ty">資格</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/certification/data-analyst-associate" target="_blank" rel="noopener">Data Analyst Associate</a></div>
+          <div class="desc">Databricks SQLでの分析・可視化・ダッシュボード中心。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">資格</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/certification/machine-learning-associate" target="_blank" rel="noopener">Machine Learning Associate</a></div>
+          <div class="desc">AutoML/MLflow/特徴量・モデル構築など基礎ML。</div>
+          <div class="host">databricks.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">資格</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/learn/certification/genai-engineer-associate" target="_blank" rel="noopener">Generative AI Engineer Associate</a></div>
+          <div class="desc">Vector Search/Model Serving/Unity CatalogでLLMソリューションを設計。</div>
+          <div class="host">databricks.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 9</span>外部講座・定番書籍</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip ty">Udemy</span><span class="star">★定番</span></div>
+          <div class="ttl"><a href="https://www.udemy.com/course/databricks-certified-data-engineer-associate/" target="_blank" rel="noopener">DE Associate 対策（Derar Alhussein, Udemy）</a></div>
+          <div class="desc">高評価・受講者多数。DE Associate対策の定番ハンズオン講座。</div>
+          <div class="host">udemy.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip ty">Coursera</span></div>
+          <div class="ttl"><a href="https://www.coursera.org/learn/data-engineering-with-delta-lake-on-databricks" target="_blank" rel="noopener">Data Engineering with Delta Lake on Databricks</a></div>
+          <div class="desc">Delta Lake中心のDE入門＋演習（※サードパーティ提供）。</div>
+          <div class="host">coursera.org</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-basic">基礎</span><span class="chip lv-mid">中級</span><span class="chip ty">書籍(英)</span></div>
+          <div class="ttl"><a href="https://www.oreilly.com/library/view/learning-spark-2nd/9781492050032/" target="_blank" rel="noopener">Learning Spark, 2nd Edition（O'Reilly）</a></div>
+          <div class="desc">Spark構造化API入門の定番。<a href="https://pages.databricks.com/202003-US-EB-Learning-Spark-2nd-Edition_01_Downloadpage.html" target="_blank" rel="noopener">Databricks経由の無料DL版</a>あり。</div>
+          <div class="host">oreilly.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-basic">基礎</span><span class="chip ty">書籍(日)</span></div>
+          <div class="ttl"><a href="https://www.amazon.co.jp/dp/B09TWXN35R" target="_blank" rel="noopener">データブリックス クイックスタートガイド</a></div>
+          <div class="desc">日本初のDatabricks書籍。レイクハウス基礎の入門書（※やや初期の刊行、内容の新しさは要確認）。</div>
+          <div class="host">amazon.co.jp</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-mid">中級</span><span class="chip ty">書籍(日)</span></div>
+          <div class="ttl"><a href="https://www.oreilly.com/library/view/databricks/9798341634305/" target="_blank" rel="noopener">Databricks認定データエンジニアアソシエイト 学習ガイド（日本語版）</a></div>
+          <div class="desc">Delta Lake/Spark SQL/ストリーミング/ガバナンスを網羅した資格対策書。</div>
+          <div class="host">oreilly.com</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 10</span>コミュニティ・イベント（継続学習に）</h2>
+      <div class="res">
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">コミュニティ</span><span class="star">★おすすめ</span></div>
+          <div class="ttl"><a href="https://jedai.connpass.com/" target="_blank" rel="noopener">JEDAI ― Japan Databricks User Group（connpass）</a></div>
+          <div class="desc">日本のユーザーコミュニティ。もくもく会・Meetupを定期開催。初学者歓迎。</div>
+          <div class="host">connpass.com</div>
+        </div>
+        <div class="item">
+          <div class="chips"><span class="chip lv-intro">入門</span><span class="chip lv-mid">中級</span><span class="chip ty">公式ブログ</span></div>
+          <div class="ttl"><a href="https://www.databricks.com/jp/blog" target="_blank" rel="noopener">Databricks 日本語ブログ</a></div>
+          <div class="desc">最新機能・事例が日本語で読める公式ブログ。</div>
+          <div class="host">databricks.com</div>
+        </div>
+      </div>
+      <div class="box warn">
+        <div class="label">⚠️ リンク利用上の注意</div>
+        <p>URLは2026年6月17日時点で実在確認済みですが、Udemy/Coursera等の外部講座や記事は提供者都合で改題・公開停止・陳腐化することがあります。受講・参照前に<strong>更新日と内容</strong>を軽くご確認ください。日本語コミュニティ記事は更新の速い著者（@taka_yayoi 氏、classmethod 等）を優先すると外しにくいです。</p>
+      </div>
+      <footer>
+        <p><strong>このタブについて：</strong>Databricksを体系的に学ぶための厳選URL集です（2026年6月17日時点・実在確認済み）。全体像の解説は <a href="#" class="xlink" data-target="doc-main">📘 本編：入門ガイド</a>、本日の最新発表は <a href="#" class="xlink" data-target="doc-summit">📣 Data+AI Summit 2026 速報</a> をどうぞ。</p>
+      </footer>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============================================================= -->
+<!-- DOC 3 : Data + AI Summit 2026 速報                              -->
+<!-- ============================================================= -->
+<div class="doc" id="doc-summit">
+  <header class="hero h-summit">
+    <div class="inner">
+      <span class="kicker">Data + AI Summit 2026 ― 速報まとめ</span>
+      <h1>Data + AI Summit 2026<br>Databricks 最新発表ダイジェスト</h1>
+      <p>本日開催中のDatabricks年次カンファレンス「Data + AI Summit 2026」での主要発表を、出典付きで初学者向けに整理しました。テーマは明確に「<strong>パイプラインの終焉（データ統合）</strong>」と「<strong>エージェントAIの本番運用</strong>」です。</p>
+      <div class="meta">
+        <span>📅 2026年6月17日（Day 3）時点</span>
+        <span>📍 San Francisco・Moscone（会期 6/15–18）</span>
+        <span>⚠️ 会期中につき追加発表あり</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <div class="box warn">
+      <div class="label">⚠️ 読むうえでの前提（重要）</div>
+      <p>本タブは会期中（Day 3）時点の速報です。<strong>公式ブログ／プレスリリースで確認できた事実</strong>と、<strong>テックメディア報道ベースでステータスが未確定な情報</strong>を分けて記載しています。機能のステータス（GA / プレビュー等）や正式名称は今後変わる可能性があります。各項目末尾の出典でご確認ください。本日時点で <strong>新しい基盤モデル（DBRX後継）の発表は確認できていません</strong>。</p>
+    </div>
+
+    <section>
+      <h2><span class="num">TL;DR</span>3行サマリー</h2>
+      <div class="tldr">
+        <div class="tcard"><div class="n">THEME 01</div><h4>パイプラインの終焉</h4><p>運用DB（OLTP）と分析（OLAP）を1つのデータで統合する新概念 <strong>LTAP</strong> を発表。ETL/レプリカを不要にする狙い。</p></div>
+        <div class="tcard"><div class="n">THEME 02</div><h4>エージェントAIの本番化</h4><p><strong>Agent Bricks</strong> が開発者向けプラットフォームへ進化。メモリ・サンドボックス・ツール・統制を一式提供。</p></div>
+        <div class="tcard"><div class="n">THEME 03</div><h4>AIガバナンス強化</h4><p><strong>Unity Catalog</strong> 大幅拡充＋<strong>Unity AI Gateway</strong>で、モデル/エージェント/MCPを一元統制。</p></div>
+      </div>
+      <div class="legend">
+        <strong>ステータス凡例：</strong>
+        <span class="badge b-ga">GA（一般提供）</span>
+        <span class="badge b-pp">Public Preview</span>
+        <span class="badge b-beta">Beta</span>
+        <span class="badge b-soon">Coming Soon</span>
+        <span class="badge b-ann">発表のみ</span>
+        <span class="badge b-chk">要確認</span>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 1</span>目玉：LTAP / Lakebase（運用×分析の統合）</h2>
+      <div class="feat">
+        <h4>LTAP（Lake Transactional/Analytical Processing） <span class="badge b-soon">Coming Soon</span> <span class="badge b-ann">発表</span></h4>
+        <p>トランザクション処理（OLTP）と分析（OLAP）、さらにストリーミングを<strong>「単一のデータコピー」</strong>（オブジェクトストレージ上のDelta/Iceberg）で扱う新アーキテクチャ。これにより、従来必要だった<strong>ETLパイプライン・レプリカ・CDCを不要にする</strong>という構想。Databricksは「世界初のLTAP」と表現し、<strong>「パイプラインの終焉」</strong>を掲げました。</p>
+        <p>ガバナンスはUnity Catalogで統一。提供は <strong>Lakebaseの一部として「coming soon」</strong>（＝発表・プレビュー段階で、まだGAではない）。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical" target="_blank" rel="noopener">Databricks プレスリリース（LTAP, 6/16）</a>／<a href="https://siliconangle.com/2026/06/16/databricks-declares-end-pipelines-unified-platform-operational-analytical-data/" target="_blank" rel="noopener">SiliconANGLE</a></p>
+      </div>
+      <div class="feat">
+        <h4>Lakebase（サーバーレスPostgres）の新機能 <span class="badge b-ga">本体GA</span> <span class="badge b-ann">新機能は発表</span></h4>
+        <p>2025年のNeon買収由来のサーバーレスPostgres。本体は2026年初頭にGA済みで、「数千社が利用、<strong>1日1,200万回のDB起動</strong>」を公表。今回の新機能として、<strong>クロスクラウド/クロスリージョンの災害復旧（DR）</strong>、<strong>Gitスタイルのブランチ＆スナップショット</strong>、<strong>自律的なDB運用</strong>を追加。AIエージェントの「記憶層」としても位置づけられます。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical" target="_blank" rel="noopener">同 プレスリリース（6/16）</a></p>
+      </div>
+      <div class="feat">
+        <h4>Lakehouse//RT ＋ 新エンジン「Reyden」 <span class="badge b-beta">Beta</span> <span class="badge b-chk">ステータス要確認</span></h4>
+        <p>リアルタイム分析エンジン。小規模で約10ms、大規模でも100ms未満のレイテンシ、数万規模の同時ユーザー/エージェントに対応し、既存ウェアハウスの<strong>ドロップイン置換</strong>を狙うとされます。基盤の新実行エンジン「Reyden」（共同創業者 Reynold Xin に由来する命名）は既存比 最大16倍の性能を主張。</p>
+        <p><strong>注：</strong>この項目は主にテックメディア（SiliconANGLE）報道に基づき、公式単独ソースでの裏取りが弱め。ステータス（beta/launched）の表記にも揺れがあるため<strong>要確認</strong>です。</p>
+        <p class="src">出典：<a href="https://siliconangle.com/2026/06/16/databricks-declares-end-pipelines-unified-platform-operational-analytical-data/" target="_blank" rel="noopener">SiliconANGLE（6/16）</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 2</span>Agent Bricks（エージェント開発プラットフォーム）</h2>
+      <p class="lead">「どのモデル・どのフレームワークでも」エージェントを構築・統制・本番デプロイできる包括プラットフォームへ進化。実績として「<strong>10万超のエージェント構築、年間1クアドリリオン（10<sup>15</sup>）トークン処理</strong>」を公表しました。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>新機能</th><th>内容</th><th>ステータス</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Document Intelligence（SQL関数）</strong></td><td><code>ai_parse_document</code> / <code>ai_extract</code> / <code>ai_classify</code> ― 文書解析・抽出・分類をSQLで実行</td><td><span class="badge b-ga">GA</span></td></tr>
+            <tr><td><strong>Agent Memory Service</strong></td><td>Lakebase駆動の管理型メモリ。会話/セッション履歴をセッションを跨いで永続化</td><td><span class="badge b-ann">発表</span></td></tr>
+            <tr><td><strong>Databricks Sandbox</strong></td><td>Unity Catalogアクセスを絞った安全な隔離VM（コードインタプリタ／サブエージェント用）</td><td><span class="badge b-ann">発表</span></td></tr>
+            <tr><td><strong>Databricks Agent Tools</strong></td><td>統制済みの組み込みツール群。エージェント検索が従来比 約3倍高速</td><td><span class="badge b-ann">発表</span></td></tr>
+            <tr><td><strong>Omnigent（メタハーネス）</strong></td><td>LangGraph / Agno / CrewAI 等を束ねる管理版オーケストレーション（OSS）</td><td><span class="badge b-ann">発表</span></td></tr>
+            <tr><td><strong>MCP対応</strong></td><td>Unity Catalog経由で Google Drive / JIRA / Slack / GitHub 等に安全接続</td><td><span class="badge b-ann">発表</span></td></tr>
+            <tr><td><strong>モデル選択肢の拡充</strong></td><td>OpenAI / Anthropic / Gemini / Qwen / Kimi に加え <strong>Grok（xAI）</strong> 連携も（提携形態の詳細は<span class="badge b-chk">要確認</span>）</td><td><span class="badge b-ann">発表</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box note">
+        <div class="label">📌 初学者向けの意味</div>
+        <p>ざっくり言うと「<strong>社内データに安全にアクセスし、記憶を持ち、ツールを使えるAIエージェントを、Databricks上で作って本番運用するための“フルセット”</strong>」が揃った、ということ。RAGの次の「エージェント」時代に本気で寄せた発表です。</p>
+      </div>
+      <p class="src">出典：<a href="https://www.databricks.com/blog/agent-bricks-dais-2026" target="_blank" rel="noopener">Agent Bricks 公式ブログ（6/16）</a>／<a href="https://siliconangle.com/2026/06/16/agi-moment-databricks-new-releases-zero-support-deployment-ai-agents/" target="_blank" rel="noopener">SiliconANGLE（6/16）</a></p>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 3</span>Genie（AI/BIエージェント）</h2>
+      <div class="feat">
+        <h4>Genie One <span class="badge b-ann">発表</span></h4>
+        <p>実業務データに根ざして作業を自動化する「エージェント型の同僚（co-worker）」。Ali Ghodsi CEO は「Genie One は“計算する”、他の多くのエージェントは“復唱する”だけ」と差別化を強調しました。</p>
+      </div>
+      <div class="feat">
+        <h4>Genie Ontology <span class="badge b-ann">発表</span></h4>
+        <p>社内外データから継続的に学習する「ライブのコンテキスト層」。企業内の情報探索における“PageRank”のような役割と説明されています。</p>
+      </div>
+      <div class="feat">
+        <h4>Genie App Builder ／ Lakeflow Designer <span class="badge b-ann">発表</span> <span class="badge b-chk">ステータス要確認</span></h4>
+        <p><strong>Genie App Builder</strong>：自社のライブデータで動く、統制済みのローコード・アプリ構築環境。<strong>Lakeflow Designer</strong>：自然言語でデータパイプラインを設計・自動化。いずれも正式なGA/Previewの別は明示が弱く、現時点では発表ベースです。</p>
+        <p class="src">出典：<a href="https://siliconangle.com/2026/06/16/agi-moment-databricks-new-releases-zero-support-deployment-ai-agents/" target="_blank" rel="noopener">SiliconANGLE</a>／<a href="https://www.techtimes.com/articles/318450/20260616/databricks-summit-2026-day-2-agentic-ai-catalog-federation-move-lab-enterprise.htm" target="_blank" rel="noopener">Tech Times（Day2まとめ）</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 4</span>ガバナンス：Unity Catalog / Unity AI Gateway</h2>
+      <p class="lead">公式ブログ「What's new with Unity Catalog at DAIS 2026」（6/16）に基づく整理です。ステータスは原文準拠。</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>ステータス</th><th>主な新機能</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge b-ga">GA</span></td><td>External Lineage（Databricks外への系譜追跡）／Table Insights（列の利用人気度）／Managed Disaster Recovery／Iceberg v3のネイティブ地理空間型／Managed Iceberg</td></tr>
+            <tr><td><span class="badge b-pp">Public Preview</span></td><td>Governance Hub／Domains（業務に沿ったデータ組織化）／Metrics拡張・Materialization／ABAC Grant Policies／マネージドDeltaテーブルへの外部アクセス</td></tr>
+            <tr><td><span class="badge b-beta">Beta</span></td><td>Contextual Service Policies（実行時ガバナンス）／マルチモーダルデータ（PDF・画像のFILE型）／Metrics import（Power BI/Tableau取込）</td></tr>
+            <tr><td><span class="badge b-soon">Coming Soon</span></td><td>Glossary（業務用語管理）／Identity・Context Attributes（属性ベースのアクセス制御）／Cross-region governance ／RBAC ほか</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="feat">
+        <h4>Unity AI Gateway <span class="badge b-ann">発表</span> <span class="badge b-beta">一部Beta</span></h4>
+        <p>モデル・ツール・エージェント・MCPサービス・外部AI資産を<strong>一元統制</strong>するガバナンス層。「誰がアクセスできるか」だけでなく「AIが何を実行できるか」を管理します。<strong>統一トレーシング・予算管理・ハードな支出上限・スマートルーティング</strong>、監視基盤 Lakewatch との連携を提供。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/blog/whats-new-unity-catalog-data-ai-summit-2026" target="_blank" rel="noopener">Unity Catalog 公式ブログ（6/16）</a>／<a href="https://www.databricks.com/blog/ai-governance-data-ai-summit-2026-whats-new-unity-ai-gateway" target="_blank" rel="noopener">Unity AI Gateway 公式ブログ（6/16）</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 5</span>買収・エコシステム</h2>
+      <div class="feat">
+        <h4>Panther Labs 買収を発表 <span class="badge b-ann">発表</span></h4>
+        <p>AIセキュリティオペレーション（SOC/SIEM）のプラットフォーム企業。Databricksのセキュリティ/エージェント戦略を補強する動き（同社顧客にはAnthropicも含まれると報道）。</p>
+        <p class="src">出典：<a href="https://siliconangle.com/2026/06/16/agi-moment-databricks-new-releases-zero-support-deployment-ai-agents/" target="_blank" rel="noopener">SiliconANGLE（6/16）</a></p>
+      </div>
+      <div class="feat">
+        <h4>OpenSharing（オープンプロトコル） <span class="badge b-ann">発表</span></h4>
+        <p>エージェントの「スキル」をプラットフォームを越えて共有するための、Linux Foundation のオープンプロトコル。Databricksの「オープン戦略」の延長線上の取り組み。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-announces-2026-data-ai-summit-keynote-lineup-and" target="_blank" rel="noopener">公式プレスリリース</a>／Tech Times</p>
+      </div>
+      <div class="feat">
+        <h4>クラウドパートナー連携</h4>
+        <p>AWS・Azure双方と「エージェント時代」に向けた連携強化が発表されています。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/blog/aws-and-databricks-data-ai-summit-2026-accelerating-real-world-ai-innovation" target="_blank" rel="noopener">AWS×Databricks（公式ブログ）</a>／<a href="https://www.databricks.com/blog/unifying-data-and-governance-agentic-era-whats-new-azure-databricks" target="_blank" rel="noopener">Azure Databricks（公式ブログ）</a></p>
+      </div>
+      <div class="feat">
+        <h4>キーノート登壇者</h4>
+        <p>Databricks側：Ali Ghodsi（CEO）、Matei Zaharia（CTO）、Reynold Xin、Arsalan Tavakoli。ゲスト：<strong>Satya Nadella（Microsoft、録画対談）</strong>、<strong>Greg Brockman（OpenAI）</strong>、PepsiCo・Mastercard の幹部など。</p>
+        <p class="src">出典：<a href="https://www.databricks.com/company/newsroom/press-releases/databricks-announces-2026-data-ai-summit-keynote-lineup-and" target="_blank" rel="noopener">公式プレスリリース（キーノートラインナップ）</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 6</span>整理：確実 vs 未確定</h2>
+      <div class="box key">
+        <div class="label">✅ 公式（ブログ/プレスリリース）で確認できたもの</div>
+        <ul>
+          <li>LTAP の発表（Lakebaseの一部として coming soon）</li>
+          <li>Lakebase の新機能群（DR・ブランチ/スナップショット・自律運用）</li>
+          <li>Agent Bricks の開発者プラットフォーム化＋各構成要素（Document Intelligence の3つのSQL関数は <span class="badge b-ga">GA</span>）</li>
+          <li>Unity Catalog の各機能（GA/Preview/Betaは §4 の表のとおり）と Unity AI Gateway</li>
+        </ul>
+      </div>
+      <div class="box warn">
+        <div class="label">⚠️ 報道ベース／ステータス未確定（要確認）</div>
+        <ul>
+          <li><strong>Lakehouse//RT・Reydenエンジン</strong>：出典がSiliconANGLE中心。GA/Beta/launchedの表記に揺れ。</li>
+          <li><strong>Grok（xAI）連携</strong>の提携形態・正式名称、一部Agent Bricks要素の提供時期。</li>
+          <li><strong>Genie App Builder / Lakeflow Designer</strong> の正式ステータス（GA/Preview）。</li>
+          <li><strong>Panther Labs買収</strong>の金額・クローズ時期（独立メディア報道ベース）。</li>
+        </ul>
+      </div>
+      <div class="box note">
+        <div class="label">🔎 確認できなかったもの</div>
+        <p>本日時点で <strong>新しい基盤モデル（DBRX後継）の発表は確認できませんでした</strong>。また日本語メディア（ITmedia/Publickey/日経クロステック等）の個別記事は今回ヒットせず、独立系の裏取りは主に SiliconANGLE と Tech Times でした。会期は6/18まで続くため、明日以降に追加発表・各社の詳報が出る見込みです。</p>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="num">SECTION 7</span>一次ソース・参考リンク</h2>
+      <div class="box">
+        <div class="label">公式（一次情報）</div>
+        <ul>
+          <li><a href="https://www.databricks.com/company/newsroom/press-releases/databricks-launches-ltap-first-lake-transactionalanalytical" target="_blank" rel="noopener">LTAP 発表プレスリリース</a></li>
+          <li><a href="https://www.databricks.com/blog/agent-bricks-dais-2026" target="_blank" rel="noopener">Agent Bricks ブログ</a></li>
+          <li><a href="https://www.databricks.com/blog/whats-new-unity-catalog-data-ai-summit-2026" target="_blank" rel="noopener">Unity Catalog ブログ</a> ／ <a href="https://www.databricks.com/blog/ai-governance-data-ai-summit-2026-whats-new-unity-ai-gateway" target="_blank" rel="noopener">Unity AI Gateway ブログ</a></li>
+          <li><a href="https://www.databricks.com/blog/aws-and-databricks-data-ai-summit-2026-accelerating-real-world-ai-innovation" target="_blank" rel="noopener">AWS×Databricks ブログ</a> ／ <a href="https://www.databricks.com/blog/unifying-data-and-governance-agentic-era-whats-new-azure-databricks" target="_blank" rel="noopener">Azure Databricks ブログ</a></li>
+          <li><a href="https://www.databricks.com/company/newsroom/press-releases/databricks-announces-2026-data-ai-summit-keynote-lineup-and" target="_blank" rel="noopener">キーノートラインナップ（プレスリリース）</a></li>
+          <li><a href="https://www.databricks.com/dataaisummit" target="_blank" rel="noopener">Data + AI Summit 公式サイト</a> ／ <a href="https://www.databricks.com/blog" target="_blank" rel="noopener">Databricks ブログ（最新）</a></li>
+        </ul>
+        <div class="label" style="margin-top:10px;">テックメディア（報道）</div>
+        <ul>
+          <li><a href="https://siliconangle.com/2026/06/16/databricks-declares-end-pipelines-unified-platform-operational-analytical-data/" target="_blank" rel="noopener">SiliconANGLE：パイプラインの終焉 / LTAP</a></li>
+          <li><a href="https://siliconangle.com/2026/06/16/agi-moment-databricks-new-releases-zero-support-deployment-ai-agents/" target="_blank" rel="noopener">SiliconANGLE：エージェント関連発表</a></li>
+          <li><a href="https://www.techtimes.com/articles/318450/20260616/databricks-summit-2026-day-2-agentic-ai-catalog-federation-move-lab-enterprise.htm" target="_blank" rel="noopener">Tech Times：Summit 2026 Day2 まとめ</a></li>
+        </ul>
+      </div>
+      <footer>
+        <p><strong>このタブについて：</strong>Data + AI Summit 2026（会期 6/15–18）の発表を、2026年6月17日（Day3）時点で出典付きにまとめた速報です。会期中のため内容は更新される可能性があります。基礎は <a href="#" class="xlink" data-target="doc-main">📘 本編：入門ガイド</a>、体系的な学習は <a href="#" class="xlink" data-target="doc-learn">📚 学習リソース集</a> をどうぞ。</p>
+      </footer>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  (function(){
+    var tabs=document.querySelectorAll('.tab');
+    var docs=document.querySelectorAll('.doc');
+    function show(id){
+      docs.forEach(function(d){d.classList.toggle('active',d.id===id);});
+      tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-target')===id);});
+      window.scrollTo(0,0);
+    }
+    tabs.forEach(function(t){t.addEventListener('click',function(){show(t.getAttribute('data-target'));});});
+    document.querySelectorAll('.xlink').forEach(function(a){
+      a.addEventListener('click',function(e){e.preventDefault();show(a.getAttribute('data-target'));});
+    });
+  })();
+</script>
+</body>
+</html>
